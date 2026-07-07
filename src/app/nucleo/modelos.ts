@@ -1,27 +1,20 @@
-/**
- * Modelos de dominio del Sistema de Ventas Sodimac.
- * Reflejan las entidades del documento de análisis (Producto, Pedido,
- * DetallePedido, Categoría, Inventario, etc.).
- */
+// Modelos de dominio: Producto, Pedido, Inventario, Rol, etc.
 
 export type Canal = 'tienda' | 'admin';
 
-/** Roles/actores del sistema (CUS: Cliente, Cajero, Asesor, Logística, Gerente). */
 export interface Rol {
   clave: string;
   nombre: string;
   descripcion: string;
   destino: 'tienda' | 'admin';
   moduloInicial: ModuloAdmin | null;
-  /** Módulos del panel a los que el rol tiene acceso. */
-  modulos: ModuloAdmin[];
+  modulos: ModuloAdmin[]; // módulos del panel a los que tiene acceso
   color: string;
   inicial: string;
 }
 
 export type ModuloAdmin = 'dashboard' | 'pos' | 'inventario' | 'reportes' | 'devoluciones' | 'consulta';
 
-/** Producto del catálogo (entidad Producto: SKU, nombre, precio, stock, ubicación). */
 export interface Producto {
   sku: string;
   nombre: string;
@@ -31,33 +24,28 @@ export interface Producto {
   minimo: number;
   categoria: string;
   ubicacion: string;
-  descripcion: string; // para qué sirve el producto
-  caracteristicas: string[]; // ficha técnica resumida
-  imagen: string; // ruta de la imagen del producto (luego vendrá de la BD)
-  tinte: string; // color de fondo de la miniatura
+  descripcion: string;
+  caracteristicas: string[];
+  imagen: string; // ruta local; luego vendrá de la BD
+  tinte: string; // fondo de la miniatura
   tinta: string; // color de acento de la categoría
   inicial: string;
 }
 
-/**
- * Credencial de acceso: asocia un usuario y clave a un rol.
- * El login resuelve el rol a partir de estas credenciales (sin tarjetas de rol).
- * Mockup en memoria; luego se validará contra el backend.
- */
+// El login deriva el rol a partir de usuario + clave.
 export interface Credencial {
   usuario: string;
   clave: string;
-  rol: string; // clave del Rol asociado
+  rol: string;
 }
 
-/** Línea de un carrito o ticket (entidad DetallePedido). */
+// Línea de carrito o ticket (DetallePedido).
 export interface LineaCarrito {
   producto: Producto;
   cantidad: number;
   subtotal: number;
 }
 
-/** Totales calculados con IGV 18 %. */
 export interface Totales {
   subtotal: number;
   igv: number;
@@ -70,7 +58,7 @@ export type EstadoStock = 'ok' | 'bajo' | 'critico';
 export interface EstadoStockInfo {
   estado: EstadoStock;
   etiqueta: string;
-  color: string; // texto
+  color: string;
   fondo: string;
   punto: string;
 }
