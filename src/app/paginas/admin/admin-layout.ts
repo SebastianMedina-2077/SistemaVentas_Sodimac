@@ -11,12 +11,15 @@ interface ItemNav {
   icono: string;
 }
 
+// Referencia de casos de uso: pos=CUS-01, devoluciones=CUS-04,
+// inventario=CUS-05, reportes=CUS-06.
 const TITULOS: Record<string, string> = {
-  dashboard: 'Dashboard General',
-  pos: 'Punto de Venta — CUS-01',
-  inventario: 'Gestión de Inventario — CUS-05',
-  reportes: 'Reportes de Ventas — CUS-06',
-  devoluciones: 'Devoluciones y Cambios — CUS-04',
+  dashboard: 'Dashboard general',
+  pos: 'Punto de venta',
+  inventario: 'Gestión de inventario',
+  reportes: 'Reportes de ventas',
+  devoluciones: 'Devoluciones y cambios',
+  consulta: 'Consulta de productos',
 };
 
 @Component({
@@ -32,13 +35,21 @@ export class AdminLayout {
   readonly nombreRol = this.sesion.nombreRol;
   readonly iniciales = this.sesion.iniciales;
 
-  readonly items: ItemNav[] = [
+  /** Todos los módulos del panel, en orden lógico. */
+  private readonly todos: ItemNav[] = [
     { ruta: 'dashboard', nombre: 'Dashboard', icono: 'bi-grid-1x2' },
-    { ruta: 'pos', nombre: 'Punto de Venta', icono: 'bi-upc-scan' },
+    { ruta: 'pos', nombre: 'Punto de venta', icono: 'bi-upc-scan' },
+    { ruta: 'consulta', nombre: 'Consulta de productos', icono: 'bi-search' },
     { ruta: 'inventario', nombre: 'Inventario', icono: 'bi-box-seam' },
     { ruta: 'reportes', nombre: 'Reportes', icono: 'bi-bar-chart' },
     { ruta: 'devoluciones', nombre: 'Devoluciones', icono: 'bi-arrow-return-left' },
   ];
+
+  /** Solo los módulos permitidos para el rol activo. */
+  readonly items = computed(() => {
+    const permitidos = this.sesion.rol()?.modulos ?? [];
+    return this.todos.filter((it) => permitidos.includes(it.ruta as never));
+  });
 
   private readonly url = toSignal(
     this.router.events.pipe(

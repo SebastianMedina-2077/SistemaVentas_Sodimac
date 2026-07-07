@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { moduloGuard } from './nucleo/modulo.guard';
 import { sesionGuard } from './nucleo/sesion.guard';
 
 export const routes: Routes = [
@@ -37,11 +38,12 @@ export const routes: Routes = [
     loadComponent: () => import('./paginas/admin/admin-layout').then((m) => m.AdminLayout),
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-      { path: 'dashboard', title: 'Dashboard · Sodimac', loadComponent: () => import('./paginas/admin/dashboard').then((m) => m.Dashboard) },
-      { path: 'pos', title: 'Punto de Venta · Sodimac', loadComponent: () => import('./paginas/admin/pos').then((m) => m.Pos) },
-      { path: 'inventario', title: 'Inventario · Sodimac', loadComponent: () => import('./paginas/admin/inventario').then((m) => m.Inventario) },
-      { path: 'reportes', title: 'Reportes · Sodimac', loadComponent: () => import('./paginas/admin/reportes').then((m) => m.Reportes) },
-      { path: 'devoluciones', title: 'Devoluciones · Sodimac', loadComponent: () => import('./paginas/admin/devoluciones').then((m) => m.Devoluciones) },
+      { path: 'dashboard', canActivate: [moduloGuard], title: 'Dashboard · Sodimac', loadComponent: () => import('./paginas/admin/dashboard').then((m) => m.Dashboard) },
+      { path: 'pos', canActivate: [moduloGuard], title: 'Punto de Venta · Sodimac', loadComponent: () => import('./paginas/admin/pos').then((m) => m.Pos) },
+      { path: 'inventario', canActivate: [moduloGuard], title: 'Inventario · Sodimac', loadComponent: () => import('./paginas/admin/inventario').then((m) => m.Inventario) },
+      { path: 'reportes', canActivate: [moduloGuard], title: 'Reportes · Sodimac', loadComponent: () => import('./paginas/admin/reportes').then((m) => m.Reportes) },
+      { path: 'devoluciones', canActivate: [moduloGuard], title: 'Devoluciones · Sodimac', loadComponent: () => import('./paginas/admin/devoluciones').then((m) => m.Devoluciones) },
+      { path: 'consulta', canActivate: [moduloGuard], title: 'Consulta de productos · Sodimac', loadComponent: () => import('./paginas/admin/consulta').then((m) => m.Consulta) },
     ],
   },
 

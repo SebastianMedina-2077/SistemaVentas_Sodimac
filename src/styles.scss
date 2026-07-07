@@ -162,6 +162,21 @@ body {
 
 .cursor-pointer { cursor: pointer; }
 
+/* --- Enlace/botón de texto sutil: sin subrayado permanente ---
+   El subrayado aparece solo al pasar el cursor o con foco de teclado. */
+.sv-enlace {
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 0.4rem;
+  transition: color 0.12s;
+}
+.sv-enlace:hover { text-decoration: underline; }
+.sv-enlace:focus-visible {
+  outline: 2px solid var(--sv-azul);
+  outline-offset: 2px;
+  text-decoration: none;
+}
+
 /* --- Franja de marca Sodimac (barras azul/amarillo/rojo del logo) --- */
 .sv-franja-marca {
   height: 4px; width: 100%;

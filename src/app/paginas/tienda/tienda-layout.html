@@ -12,7 +12,7 @@
           type="search"
           class="form-control rounded-pill ps-5"
           style="background:#f5f7fa"
-          placeholder="Busca productos, marcas y más…"
+          placeholder="¿Qué estás buscando hoy?"
           (input)="buscar($any($event.target).value)"
           aria-label="Buscar productos"
         />
@@ -34,8 +34,10 @@
             >{{ carrito.unidades('tienda') }}</span
           >
         </a>
-        <button type="button" class="btn btn-link btn-sm text-suave text-decoration-underline" (click)="salir()">
-          Salir
+        <button type="button" class="btn btn-link sv-enlace text-suave d-inline-flex align-items-center gap-1 px-2"
+                style="min-height:44px" (click)="salir()">
+          <i class="bi bi-box-arrow-right"></i>
+          <span class="d-none d-sm-inline">Salir</span>
         </button>
       </div>
     </div>
