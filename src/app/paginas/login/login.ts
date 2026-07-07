@@ -16,21 +16,20 @@ export class Login {
 
   readonly enviado = signal(false);
   readonly verClave = signal(false);
-  /** Mensaje cuando el usuario o la contraseña no coinciden con ningún rol. */
-  readonly errorAcceso = signal('');
+  readonly errorAcceso = signal(''); // credenciales que no coinciden
 
   readonly form = this.fb.nonNullable.group({
     usuario: ['', [Validators.required, Validators.minLength(3)]],
     clave: ['', [Validators.required, Validators.minLength(4)]],
   });
 
-  /** Verdadero cuando el campo es inválido y ya debe mostrarse el error. */
+  // Muestra el error solo si el campo se tocó o ya se intentó enviar.
   invalido(campo: 'usuario' | 'clave'): boolean {
     const c = this.form.controls[campo];
     return c.invalid && (c.touched || this.enviado());
   }
 
-  /** Estado visual del campo para el icono de validación: 'ok' | 'mal' | ''. */
+  // Estado para el icono de validación del campo.
   estado(campo: 'usuario' | 'clave'): 'ok' | 'mal' | '' {
     const c = this.form.controls[campo];
     if (this.invalido(campo)) return 'mal';

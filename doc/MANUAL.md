@@ -116,7 +116,54 @@ una petición al API, manteniendo las mismas interfaces de `modelos.ts`.
 
 ## Comandos
 
+Instalar dependencias:
+
 ```bash
-npm start        # desarrollo (http://localhost:4200)
-npm run build    # build de producción en dist/
+npm install     # instala lo declarado en package.json
+npm ci          # alternativa: instalación limpia y reproducible desde package-lock.json
 ```
+
+Angular CLI viene como dependencia del proyecto, no hace falta instalarlo aparte. Si lo
+quieres global para usar `ng` directo en la terminal: `npm install -g @angular/cli`.
+
+Levantar el servidor de desarrollo (cualquiera de estas sirve):
+
+```bash
+npm start                        # atajo de package.json (ng serve) → http://localhost:4200
+npx ng serve                     # equivalente, sin CLI global
+npx ng serve --open --port 4300  # abre el navegador y usa otro puerto
+```
+
+Compilar para producción:
+
+```bash
+npm run build   # genera la build optimizada en dist/
+```
+
+## Historial de cambios
+
+### 2026-07-07 — Rebrand Sodimac, login por credenciales y acceso por rol
+
+**Identidad visual.** Se cambió la paleta naranja por la del logo de Sodimac: azul `#0072CE`
+(primario), rojo `#E30613`, amarillo `#FFD100` y negro azulado `#16202B`, con fondo `#F5F7FA`.
+Afecta `styles.scss` y las plantillas. Nueva franja de marca (`.sv-franja-marca`) en el login.
+
+**Imágenes de producto.** Los productos usan una ilustración por categoría en
+`public/img/productos/*.svg` (campo `imagen` de `Producto`), lista para reemplazar por URLs
+reales cuando el catálogo pase a base de datos.
+
+**Login.** Se quitaron las tarjetas de rol; ahora el acceso es por usuario + contraseña y el
+rol se deriva de las credenciales (`CREDENCIALES` y `autenticar()` en `datos.ts`). Incluye
+botón de mostrar/ocultar contraseña.
+
+**Control de acceso por rol.** Nuevo `modulo.guard.ts`: restringe cada módulo de `/admin`
+según `Rol.modulos` y redirige al módulo inicial del rol si no tiene acceso. El menú lateral
+también se filtra por rol (gerente ve todo; cajero solo POS; logística solo inventario;
+asesor solo consulta).
+
+**Nuevo módulo Consulta de productos.** Buscador de solo lectura para el asesor con stock,
+ubicación, precio, descripción y características (campos `descripcion` y `caracteristicas` en
+`Producto`, mapa `DETALLES` en `datos.ts`).
+
+**Estilos.** Bootstrap se integra con `@use ... with` en vez de `@import`, para eliminar el
+aviso de deprecación de Dart Sass.

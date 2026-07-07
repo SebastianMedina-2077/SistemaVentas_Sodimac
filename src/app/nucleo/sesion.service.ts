@@ -1,10 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { Rol } from './modelos';
 
-/**
- * Mantiene el rol autenticado durante la sesión (CUS: control de acceso por rol).
- * Es un mockup en memoria: no persiste ni valida contra backend.
- */
+// Guarda el rol autenticado en memoria durante la sesión.
 @Injectable({ providedIn: 'root' })
 export class SesionService {
   private readonly _rol = signal<Rol | null>(null);
@@ -13,7 +10,7 @@ export class SesionService {
   readonly autenticado = computed(() => this._rol() !== null);
   readonly nombreRol = computed(() => this._rol()?.nombre ?? '');
 
-  /** Iniciales para el avatar (p. ej. "Gerente de Tienda" → "GT"). */
+  // Iniciales para el avatar ("Gerente de Tienda" → "GT").
   readonly iniciales = computed(() => {
     const nombre = this._rol()?.nombre ?? '';
     return nombre

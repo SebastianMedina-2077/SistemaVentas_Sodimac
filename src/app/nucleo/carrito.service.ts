@@ -6,11 +6,7 @@ type Canal = 'tienda' | 'pos';
 
 const IGV = 0.18;
 
-/**
- * Gestiona dos "carritos" independientes en memoria:
- *  - `tienda`: carrito del cliente en la compra en línea (CUS-02).
- *  - `pos`: ticket de venta del cajero en el punto de venta (CUS-01).
- */
+// Dos carritos independientes en memoria: 'tienda' (compra online) y 'pos' (ticket del cajero).
 @Injectable({ providedIn: 'root' })
 export class CarritoService {
   private readonly indice = new Map(PRODUCTOS.map((p) => [p.sku, p]));
@@ -20,7 +16,7 @@ export class CarritoService {
     pos: signal<Record<string, number>>({}),
   };
 
-  /** Señal cruda (sku → cantidad) del canal indicado. */
+  // Señal cruda (sku → cantidad) del canal.
   crudo(canal: Canal): Signal<Record<string, number>> {
     return this.carritos[canal].asReadonly();
   }
@@ -50,7 +46,7 @@ export class CarritoService {
     this.carritos[canal].set({});
   }
 
-  /** Líneas materializadas del carrito (lee la señal → reactivo). */
+  // Líneas del carrito (lee la señal, por eso es reactivo).
   lineas(canal: Canal): LineaCarrito[] {
     const mapa = this.carritos[canal]();
     return Object.keys(mapa).map((sku) => {
@@ -64,7 +60,7 @@ export class CarritoService {
     return Object.values(this.carritos[canal]()).reduce((a, b) => a + b, 0);
   }
 
-  /** Total con IGV incluido; se desglosa subtotal + IGV (18 %). */
+  // El precio ya incluye IGV; aquí se desglosa el 18 %.
   totales(canal: Canal): Totales {
     const total = this.lineas(canal).reduce((acc, l) => acc + l.subtotal, 0);
     const subtotal = total / (1 + IGV);

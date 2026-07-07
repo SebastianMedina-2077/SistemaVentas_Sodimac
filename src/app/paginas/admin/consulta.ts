@@ -3,11 +3,7 @@ import { InventarioService } from '../../nucleo/inventario.service';
 import { Producto } from '../../nucleo/modelos';
 import { SolesPipe } from '../../nucleo/soles.pipe';
 
-/**
- * Consulta de productos para el asesor de ventas. Solo lectura: permite buscar
- * un producto y ver su stock, ubicación, características y para qué sirve.
- * No vende ni edita.
- */
+// Consulta de solo lectura para el asesor: busca un producto y ve stock, ubicación y ficha.
 @Component({
   selector: 'app-consulta',
   imports: [SolesPipe],

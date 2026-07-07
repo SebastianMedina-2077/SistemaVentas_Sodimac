@@ -1,10 +1,6 @@
 import { Credencial, Producto, Rol } from './modelos';
 
-/**
- * Metadatos por categoría: color de acento (paleta Sodimac), tinte de fondo
- * e imagen ilustrativa. Las imágenes viven en public/img/productos y luego
- * se reemplazarán por las que provengan de la base de datos.
- */
+// Color de acento, tinte de fondo e imagen por categoría.
 const CATEGORIA_META: Record<string, { tinte: string; tinta: string; imagen: string }> = {
   'Herramientas Eléctricas': { tinte: '#eaf3fb', tinta: '#0072ce', imagen: 'img/productos/herramientas-electricas.svg' },
   'Construcción': { tinte: '#f1f4f7', tinta: '#5b6770', imagen: 'img/productos/construccion.svg' },
@@ -35,11 +31,7 @@ const CRUDO: [string, string, string, number, number, number, string, string][] 
   ['JAR-018', 'Manguera Reforzada 15m', 'Rehau', 49.9, 34, 15, 'Jardinería', 'Pasillo 12-A'],
 ];
 
-/**
- * Ficha técnica por SKU: para qué sirve el producto y sus características
- * principales. Se usa en la consulta de productos del asesor. Contenido de
- * referencia; luego llegará desde la base de datos.
- */
+// Ficha técnica por SKU (para la consulta del asesor).
 const DETALLES: Record<string, { descripcion: string; caracteristicas: string[] }> = {
   'FER-001': {
     descripcion: 'Taladro con función percutora para perforar concreto, ladrillo, madera y metal. Ideal para instalaciones y colgado de estructuras.',
@@ -139,11 +131,7 @@ export const ROLES: Rol[] = [
   { clave: 'gerente', nombre: 'Gerente de Tienda', descripcion: 'Acceso total: ventas, inventario y reportes', destino: 'admin', moduloInicial: 'dashboard', modulos: ['dashboard', 'pos', 'inventario', 'reportes', 'devoluciones', 'consulta'], color: '#158a48', inicial: 'G' },
 ];
 
-/**
- * Credenciales de acceso por rol. El login valida usuario + contraseña
- * contra esta tabla y deriva el rol automáticamente (sin selección manual).
- * Mockup en memoria: luego se validará contra el backend.
- */
+// Credenciales de demo; en producción se validarían contra el backend.
 export const CREDENCIALES: Credencial[] = [
   { usuario: 'cliente', clave: 'cliente123', rol: 'cliente' },
   { usuario: 'cajero', clave: 'cajero123', rol: 'cajero' },
