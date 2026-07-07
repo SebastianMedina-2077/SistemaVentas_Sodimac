@@ -1,0 +1,97 @@
+<div class="row g-4 sv-anim">
+  <!-- Catálogo POS -->
+  <div class="col-lg-8">
+    <div class="sv-card p-3 mb-3">
+      <label class="form-label small fw-semibold mb-1" for="scan">Escanear / ingresar SKU</label>
+      <div class="input-group">
+        <span class="input-group-text bg-white"><i class="bi bi-upc-scan"></i></span>
+        <input
+          id="scan"
+          class="form-control"
+          [class.is-invalid]="errorSku()"
+          [ngModel]="sku()"
+          (ngModelChange)="sku.set($event); errorSku.set('')"
+          (keyup.enter)="agregarPorSku()"
+          placeholder="Ej. FER-001"
+          autocomplete="off"
+        />
+        <button type="button" class="btn btn-ink" (click)="agregarPorSku()">Agregar</button>
+        <div class="invalid-feedback">{{ errorSku() }}</div>
+      </div>
+      <div class="form-text">Toca un producto para agregarlo o ingresa su SKU y presiona Enter.</div>
+    </div>
+
+    <div class="row g-2">
+      @for (p of productos; track p.sku) {
+        <div class="col-6 col-md-4 col-xl-3">
+          <button type="button" class="sv-card w-100 h-100 p-2 text-start border-0 sv-producto" (click)="agregar(p)">
+            <span class="d-flex align-items-center justify-content-center rounded-2 mb-2 overflow-hidden"
+                  style="height:64px" [style.background]="p.tinte">
+              <img [src]="p.imagen" [alt]="p.nombre" loading="lazy" style="height:100%;width:100%;object-fit:cover" />
+            </span>
+            <span class="d-block fw-semibold lh-sm mb-1" style="font-size:.78rem;min-height:32px">{{ p.nombre }}</span>
+            <span class="d-block font-archivo fw-bold text-primary">{{ p.precio | soles }}</span>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Ticket -->
+  <div class="col-lg-4">
+    <div class="sv-card p-3 sticky-top d-flex flex-column" style="top:96px">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="font-archivo fw-bold fs-6 m-0">Venta actual</h3>
+        @if (hayItems()) {
+          <button type="button" class="btn btn-link btn-sm text-tenue p-0 text-decoration-underline" (click)="limpiar()">Limpiar</button>
+        }
+      </div>
+
+      @if (comprobante()) {
+        <div class="alert alert-success d-flex align-items-center gap-2 py-2 small" role="alert">
+          <i class="bi bi-check-circle-fill"></i>
+          <span>Comprobante <b>{{ comprobante() }}</b> emitido y stock actualizado.</span>
+        </div>
+      }
+
+      <div class="d-flex flex-column gap-2 mb-3" style="min-height:120px;max-height:320px;overflow:auto">
+        @for (l of lineas(); track l.producto.sku) {
+          <div class="d-flex gap-2 align-items-center border-bottom pb-2">
+            <span class="flex-grow-1 small lh-sm">
+              {{ l.producto.nombre }}<br />
+              <span class="text-tenue font-monospace" style="font-size:.7rem">{{ l.producto.sku }} · {{ l.producto.precio | soles }}</span>
+            </span>
+            <div class="d-flex align-items-center gap-1">
+              <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-0" (click)="decrementar(l.producto.sku)">−</button>
+              <span class="fw-bold" style="min-width:18px;text-align:center">{{ l.cantidad }}</span>
+              <button type="button" class="btn btn-outline-secondary btn-sm px-2 py-0" (click)="incrementar(l.producto.sku)">+</button>
+            </div>
+            <span class="fw-bold small" style="width:72px;text-align:right">{{ l.subtotal | soles }}</span>
+          </div>
+        } @empty {
+          <div class="text-center text-tenue small py-4">Agrega productos para iniciar la venta.</div>
+        }
+      </div>
+
+      <div class="border-top pt-3 d-flex flex-column gap-1">
+        <div class="d-flex justify-content-between text-suave small">Subtotal<span>{{ totales().subtotal | soles }}</span></div>
+        <div class="d-flex justify-content-between text-suave small">IGV (18%)<span>{{ totales().igv | soles }}</span></div>
+        <div class="d-flex justify-content-between font-archivo fw-bold fs-5">Total<span>{{ totales().total | soles }}</span></div>
+      </div>
+
+      <div class="text-uppercase text-suave fw-semibold mt-3 mb-2" style="font-size:.7rem;letter-spacing:.05em">Método de pago</div>
+      <div class="d-flex gap-2 mb-3">
+        @for (m of metodos; track m) {
+          <button type="button" class="btn btn-sm flex-grow-1"
+                  [class.btn-primary]="metodoPago() === m"
+                  [class.btn-outline-secondary]="metodoPago() !== m"
+                  (click)="metodoPago.set(m)">{{ m }}</button>
+        }
+      </div>
+
+      <button type="button" class="btn btn-primary py-2" [disabled]="!hayItems()" (click)="cobrar()">
+        <i class="bi bi-receipt me-1"></i> Cobrar y emitir comprobante
+      </button>
+    </div>
+  </div>
+</div>

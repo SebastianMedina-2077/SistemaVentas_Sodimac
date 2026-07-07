@@ -1,0 +1,74 @@
+<div class="d-flex flex-column gap-3 sv-anim" style="max-width:860px">
+  @if (procesado()) {
+    <div class="alert alert-success d-flex align-items-center gap-2 mb-0" role="alert">
+      <i class="bi bi-check-circle-fill"></i><span>{{ procesado() }}</span>
+    </div>
+  }
+
+  <!-- Buscar venta -->
+  <div class="sv-card p-4">
+    <h3 class="font-archivo fw-bold fs-6 mb-3">Buscar venta original</h3>
+    <form [formGroup]="buscador" (ngSubmit)="buscar()" novalidate>
+      <div class="input-group has-validation">
+        <input
+          class="form-control"
+          [class.is-invalid]="invalidoComprobante"
+          formControlName="comprobante"
+          placeholder="N° de comprobante (ej. B001-004521)"
+        />
+        <button type="submit" class="btn btn-ink px-4"><i class="bi bi-search me-1"></i>Buscar</button>
+        <div class="invalid-feedback">Formato inválido. Usa el patrón LNNN-NNNNNN (ej. B001-004521).</div>
+      </div>
+    </form>
+    <div class="form-text">También puedes buscar por DNI/RUC del cliente si no cuentas con el comprobante.</div>
+  </div>
+
+  <!-- Venta encontrada -->
+  @if (venta(); as v) {
+    <div class="sv-card p-4 sv-anim">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <div>
+          <div class="font-archivo fw-bold">Boleta {{ v.comprobante }}</div>
+          <div class="small text-suave mt-1">{{ v.fecha }} · Cliente: {{ v.cliente }} · Total S/ {{ v.total }}</div>
+        </div>
+        <span class="badge rounded-pill" style="background:#f0fdf4;color:#15803d">Dentro de plazo (30 días)</span>
+      </div>
+
+      <div class="border rounded-3 overflow-hidden mb-4">
+        @for (it of v.items; track it.sku; let last = $last) {
+          <div class="d-flex justify-content-between px-3 py-2 small" [class.border-bottom]="!last">
+            <span>{{ it.nombre }} · {{ it.sku }}</span>
+            <span class="fw-bold">S/ {{ it.precio }}</span>
+          </div>
+        }
+      </div>
+
+      <form [formGroup]="formDev" (ngSubmit)="procesar()" novalidate>
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold" for="motivo">Motivo de la devolución</label>
+            <select id="motivo" class="form-select" [class.is-invalid]="formDev.controls.motivo.invalid && formDev.controls.motivo.touched" formControlName="motivo">
+              <option value="">Selecciona un motivo…</option>
+              @for (m of motivos; track m) { <option [value]="m">{{ m }}</option> }
+            </select>
+            <div class="invalid-feedback">Indica el motivo de la devolución.</div>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label small fw-semibold d-block">Tipo de resolución</label>
+            <div class="d-flex gap-2">
+              <div class="sv-opcion flex-fill text-center" [class.activo]="resolucion() === 'reembolso'" (click)="resolucion.set('reembolso')">
+                <i class="bi bi-cash-coin d-block mb-1"></i><span class="small fw-semibold">Reembolso</span>
+              </div>
+              <div class="sv-opcion flex-fill text-center" [class.activo]="resolucion() === 'cambio'" (click)="resolucion.set('cambio')">
+                <i class="bi bi-arrow-repeat d-block mb-1"></i><span class="small fw-semibold">Cambio</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100 py-2 mt-4">
+          <i class="bi bi-check2-circle me-1"></i> Procesar devolución y emitir nota
+        </button>
+      </form>
+    </div>
+  }
+</div>
