@@ -1,0 +1,120 @@
+<div class="sv-login row g-0">
+  <!-- Panel de marca -->
+  <div class="col-lg-6 sv-login-marca d-none d-lg-flex flex-column justify-content-between p-5">
+    <div class="bg-white rounded-3 p-2 px-3 shadow-sm align-self-start">
+      <img src="img/sodimac-logo.png" alt="Sodimac" style="height:46px;width:auto" />
+    </div>
+
+    <div>
+      <div class="text-uppercase tracking-wide fw-semibold mb-3" style="color:#7cc4f2;font-size:.8rem">
+        Sistema de Ventas Omnicanal
+      </div>
+      <h1 class="font-archivo fw-bold mb-3" style="font-size:2.6rem;line-height:1.05;letter-spacing:-.02em">
+        Gestión integral de<br />ventas e inventario
+      </h1>
+      <p class="text-tenue mb-0" style="max-width:440px;line-height:1.6">
+        Plataforma para tiendas físicas y canal digital: punto de venta, control de stock en
+        tiempo real, reportes y experiencia de compra online.
+      </p>
+    </div>
+
+    <div class="d-flex gap-4 text-tenue small">
+      <div><div class="font-archivo fw-bold text-white fs-4">8</div>Módulos</div>
+      <div><div class="font-archivo fw-bold text-white fs-4">6</div>Casos de uso</div>
+      <div><div class="font-archivo fw-bold text-white fs-4">5</div>Roles</div>
+    </div>
+  </div>
+
+  <!-- Formulario -->
+  <div class="col-lg-6 d-flex align-items-center justify-content-center p-4 p-md-5">
+    <div class="w-100 sv-anim" style="max-width:420px">
+      <!-- Logo visible en móvil (el panel de marca se oculta) -->
+      <img src="img/sodimac-logo.png" alt="Sodimac" class="d-lg-none mb-4" style="height:44px;width:auto" />
+
+      <div class="sv-card overflow-hidden shadow-sm">
+        <div class="sv-franja-marca"></div>
+        <div class="p-4 p-md-4">
+          <h2 class="font-archivo fw-bold mb-1" style="letter-spacing:-.01em">Iniciar sesión</h2>
+          <p class="text-suave mb-4">Ingresa tu usuario y contraseña para acceder.</p>
+
+          <!-- Mensaje de credenciales inválidas -->
+          @if (errorAcceso()) {
+            <div class="alert alert-danger d-flex align-items-start gap-2 py-2 px-3 small" role="alert" aria-live="assertive">
+              <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+              <span>{{ errorAcceso() }}</span>
+            </div>
+          }
+
+          <form [formGroup]="form" (ngSubmit)="ingresar()" novalidate>
+            <!-- Usuario -->
+            <div class="mb-3">
+              <label for="usuario" class="form-label fw-semibold small">Usuario</label>
+              <div class="input-group has-validation">
+                <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
+                <input
+                  id="usuario"
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="invalido('usuario')"
+                  [class.is-valid]="estado('usuario') === 'ok'"
+                  formControlName="usuario"
+                  autocomplete="username"
+                  placeholder="Ej. gerente"
+                />
+                <div class="invalid-feedback">Ingresa tu usuario (mínimo 3 caracteres).</div>
+              </div>
+            </div>
+
+            <!-- Contraseña -->
+            <div class="mb-4">
+              <label for="clave" class="form-label fw-semibold small">Contraseña</label>
+              <div class="input-group has-validation">
+                <span class="input-group-text bg-white"><i class="bi bi-lock"></i></span>
+                <input
+                  id="clave"
+                  [type]="verClave() ? 'text' : 'password'"
+                  class="form-control border-end-0 sv-sin-icono"
+                  [class.is-invalid]="invalido('clave')"
+                  [class.is-valid]="estado('clave') === 'ok'"
+                  formControlName="clave"
+                  autocomplete="current-password"
+                  placeholder="••••••"
+                />
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary border-start-0"
+                  (click)="alternarClave()"
+                  [attr.aria-label]="verClave() ? 'Ocultar contraseña' : 'Mostrar contraseña'"
+                  [attr.aria-pressed]="verClave()"
+                >
+                  <i class="bi" [class.bi-eye]="!verClave()" [class.bi-eye-slash]="verClave()"></i>
+                </button>
+                <div class="invalid-feedback">La contraseña debe tener al menos 4 caracteres.</div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
+              <i class="bi bi-box-arrow-in-right me-1"></i> Ingresar
+            </button>
+          </form>
+
+          <!-- Credenciales de demostración -->
+          <div class="mt-4 pt-3 border-top">
+            <div class="text-uppercase text-tenue fw-semibold mb-2" style="font-size:.68rem;letter-spacing:.06em">
+              Credenciales de demostración
+            </div>
+            <div class="small text-suave d-flex flex-column gap-1">
+              <div><i class="bi bi-person-badge me-1 text-primary"></i><b>cliente</b> / cliente123 <span class="text-tenue">· tienda online</span></div>
+              <div><i class="bi bi-person-badge me-1 text-primary"></i><b>gerente</b> / gerente123 <span class="text-tenue">· panel y reportes</span></div>
+              <div><i class="bi bi-person-badge me-1 text-primary"></i><b>cajero</b> · <b>asesor</b> · <b>logistica</b> <span class="text-tenue">(clave: usuario + «123»)</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <p class="text-center text-tenue small mt-4 mb-0">
+        Angular 22 · Maquetado de referencia · Sodimac Perú
+      </p>
+    </div>
+  </div>
+</div>

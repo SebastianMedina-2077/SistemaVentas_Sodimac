@@ -1,0 +1,70 @@
+<div class="d-flex flex-column gap-4 sv-anim">
+  <!-- Barra de acciones -->
+  <div class="d-flex gap-2 flex-wrap align-items-center">
+    <div class="btn-group">
+      @for (t of pestanas; track t) {
+        <button type="button" class="btn btn-sm"
+                [class.btn-ink]="pestana() === t"
+                [class.btn-outline-secondary]="pestana() !== t"
+                (click)="pestana.set(t)">{{ t }}</button>
+      }
+    </div>
+    <div class="ms-auto d-flex gap-2">
+      <button type="button" class="btn btn-sm btn-outline-secondary bg-white" (click)="exportar('PDF')"><i class="bi bi-file-earmark-pdf me-1"></i>Exportar PDF</button>
+      <button type="button" class="btn btn-sm btn-success" (click)="exportar('Excel')"><i class="bi bi-file-earmark-excel me-1"></i>Exportar Excel</button>
+    </div>
+  </div>
+
+  @if (aviso()) {
+    <div class="alert alert-success d-flex align-items-center gap-2 mb-0" role="alert">
+      <i class="bi bi-download"></i><span>{{ aviso() }}</span>
+    </div>
+  }
+
+  <!-- KPIs -->
+  <div class="row g-3">
+    <div class="col-md-4"><div class="sv-card p-3"><div class="small text-suave mb-2">Ventas del año</div><div class="sv-kpi-valor">S/ 1.24M</div></div></div>
+    <div class="col-md-4"><div class="sv-card p-3"><div class="small text-suave mb-2">Ticket promedio</div><div class="sv-kpi-valor">S/ 342</div></div></div>
+    <div class="col-md-4"><div class="sv-card p-3"><div class="small text-suave mb-2">Unidades vendidas</div><div class="sv-kpi-valor">3,621</div></div></div>
+  </div>
+
+  <!-- Gráfico de columnas -->
+  <div class="sv-card p-4">
+    <h3 class="font-archivo fw-bold fs-6 mb-4">Ventas mensuales (2025)</h3>
+    <div class="d-flex align-items-end gap-2" style="height:200px">
+      @for (m of meses; track m.mes) {
+        <div class="flex-fill d-flex flex-column align-items-center gap-2 h-100 justify-content-end">
+          <div class="sv-columna" [style.height.%]="m.pct" [title]="m.mes"></div>
+          <span class="text-tenue" style="font-size:.7rem">{{ m.mes }}</span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Detalle por categoría -->
+  <div class="sv-card p-4">
+    <h3 class="font-archivo fw-bold fs-6 mb-3">Detalle por categoría</h3>
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr class="text-uppercase text-tenue small">
+            <th class="fw-semibold">Categoría</th>
+            <th class="fw-semibold text-end">Unidades</th>
+            <th class="fw-semibold text-end">Monto</th>
+            <th class="fw-semibold text-end">Participación</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (c of detalle; track c.categoria) {
+            <tr>
+              <td class="fw-semibold">{{ c.categoria }}</td>
+              <td class="text-end" style="color:#44403c">{{ c.unidades }}</td>
+              <td class="text-end fw-bold">{{ c.monto | soles }}</td>
+              <td class="text-end fw-bold text-primary">{{ c.participacion }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

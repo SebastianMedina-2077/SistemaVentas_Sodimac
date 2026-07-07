@@ -1,0 +1,149 @@
+<div class="container-xl py-4 sv-anim" style="max-width:1080px">
+  <a routerLink="/tienda/catalogo" class="btn btn-link btn-sm text-suave px-0 mb-2 text-decoration-none">
+    <i class="bi bi-chevron-left"></i> Seguir comprando
+  </a>
+
+  <!-- Compra confirmada -->
+  @if (confirmado()) {
+    <div class="sv-card p-5 text-center sv-anim">
+      <div class="sv-rol-avatar mx-auto mb-3" style="width:64px;height:64px;background:#15803d;font-size:2rem">
+        <i class="bi bi-check-lg"></i>
+      </div>
+      <h2 class="font-archivo fw-bold">¡Pedido confirmado!</h2>
+      <p class="text-suave mb-1">
+        Tu {{ modalidad() === 'retiro' ? 'reserva Click & Collect' : 'compra' }} se registró correctamente.
+      </p>
+      <p class="text-tenue small mb-4">
+        Se envió la confirmación a tu correo. Nº de operación de referencia: <b>B001-004{{ 522 }}</b>
+      </p>
+      <a routerLink="/tienda/catalogo" class="btn btn-primary px-4">Volver al catálogo</a>
+    </div>
+  } @else {
+    <h2 class="font-archivo fw-bold mb-4">
+      Finalizar compra <span class="text-tenue fs-6 fw-semibold">CUS-02 · CUS-03</span>
+    </h2>
+
+    <div class="row g-4">
+      <!-- Formulario -->
+      <div class="col-lg-7">
+        <form [formGroup]="form" (ngSubmit)="confirmar()" novalidate class="d-flex flex-column gap-3">
+          <!-- Modalidad -->
+          <div class="sv-card p-4">
+            <h3 class="font-archivo fw-bold fs-6 mb-3">Modalidad de entrega</h3>
+            <div class="row g-2">
+              <div class="col-6">
+                <div class="sv-opcion h-100" [class.activo]="modalidad() === 'envio'" (click)="setModalidad('envio')">
+                  <div class="fw-bold"><i class="bi bi-truck me-1"></i> Envío a domicilio</div>
+                  <div class="small text-suave mt-1">Recíbelo en 24–72h</div>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="sv-opcion h-100" [class.activo]="modalidad() === 'retiro'" (click)="setModalidad('retiro')">
+                  <div class="fw-bold"><i class="bi bi-shop me-1"></i> Retiro en tienda</div>
+                  <div class="small text-suave mt-1">Click &amp; Collect · gratis</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Datos -->
+          <div class="sv-card p-4">
+            <h3 class="font-archivo fw-bold fs-6 mb-3">Datos de {{ modalidad() === 'retiro' ? 'quien retira' : 'entrega' }}</h3>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label small fw-semibold" for="nombre">Nombre completo</label>
+                <input id="nombre" class="form-control" [class.is-invalid]="invalido('nombre')" formControlName="nombre" placeholder="Juan Pérez" />
+                <div class="invalid-feedback">Ingresa el nombre completo (mínimo 3 caracteres).</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold" for="documento">DNI / RUC</label>
+                <input id="documento" class="form-control" [class.is-invalid]="invalido('documento')" formControlName="documento" inputmode="numeric" placeholder="12345678" />
+                <div class="invalid-feedback">DNI (8 dígitos) o RUC (11 dígitos) válido.</div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label small fw-semibold" for="telefono">Teléfono</label>
+                <input id="telefono" class="form-control" [class.is-invalid]="invalido('telefono')" formControlName="telefono" inputmode="tel" placeholder="9########" />
+                <div class="invalid-feedback">Celular de 9 dígitos que empiece con 9.</div>
+              </div>
+
+              @if (modalidad() === 'envio') {
+                <div class="col-md-8">
+                  <label class="form-label small fw-semibold" for="direccion">Dirección</label>
+                  <input id="direccion" class="form-control" [class.is-invalid]="invalido('direccion')" formControlName="direccion" placeholder="Av. Los Próceres 123" />
+                  <div class="invalid-feedback">Ingresa la dirección de entrega.</div>
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label small fw-semibold" for="distrito">Distrito</label>
+                  <input id="distrito" class="form-control" [class.is-invalid]="invalido('distrito')" formControlName="distrito" placeholder="Los Olivos" />
+                  <div class="invalid-feedback">Requerido.</div>
+                </div>
+              } @else {
+                <div class="col-12">
+                  <label class="form-label small fw-semibold" for="tienda">Tienda de retiro</label>
+                  <select id="tienda" class="form-select" [class.is-invalid]="invalido('tienda')" formControlName="tienda">
+                    <option value="">Selecciona una tienda…</option>
+                    @for (t of tiendas; track t) { <option [value]="t">{{ t }}</option> }
+                  </select>
+                  <div class="invalid-feedback">Selecciona la tienda donde retirarás tu pedido.</div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Pago -->
+          <div class="sv-card p-4">
+            <h3 class="font-archivo fw-bold fs-6 mb-3">Método de pago</h3>
+            <div class="d-flex flex-wrap gap-2">
+              @for (m of metodos; track m) {
+                <label class="sv-opcion mb-0 d-flex align-items-center gap-2"
+                       [class.activo]="form.controls.metodoPago.value === m" style="padding:.6rem 1rem">
+                  <input type="radio" class="form-check-input mt-0" formControlName="metodoPago" [value]="m" />
+                  <span class="fw-semibold small">{{ m }}</span>
+                </label>
+              }
+            </div>
+            @if (invalido('metodoPago')) {
+              <div class="text-danger small mt-2"><i class="bi bi-exclamation-circle me-1"></i>Selecciona un método de pago.</div>
+            }
+          </div>
+        </form>
+      </div>
+
+      <!-- Resumen -->
+      <div class="col-lg-5">
+        <div class="sv-card p-4 sticky-top" style="top:88px">
+          <h3 class="font-archivo fw-bold fs-6 mb-3">Tu pedido</h3>
+          @if (hayItems()) {
+            <div class="d-flex flex-column gap-3 mb-3" style="max-height:280px;overflow:auto">
+              @for (l of lineas(); track l.producto.sku) {
+                <div class="d-flex gap-3 align-items-center">
+                  <span class="rounded-2 overflow-hidden flex-shrink-0" style="width:46px;height:46px"
+                        [style.background]="l.producto.tinte">
+                    <img [src]="l.producto.imagen" [alt]="l.producto.nombre" style="width:100%;height:100%;object-fit:cover" />
+                  </span>
+                  <span class="flex-grow-1 small lh-sm">
+                    {{ l.producto.nombre }}<br /><span class="text-tenue">x{{ l.cantidad }}</span>
+                  </span>
+                  <span class="fw-bold small">{{ l.subtotal | soles }}</span>
+                </div>
+              }
+            </div>
+            <div class="border-top pt-3 d-flex flex-column gap-2">
+              <div class="d-flex justify-content-between text-suave small">Subtotal<span>{{ totales().subtotal | soles }}</span></div>
+              <div class="d-flex justify-content-between text-suave small">IGV (18%)<span>{{ totales().igv | soles }}</span></div>
+              <div class="d-flex justify-content-between font-archivo fw-bold fs-5">Total<span>{{ totales().total | soles }}</span></div>
+            </div>
+            <button type="button" class="btn btn-primary w-100 py-2 mt-3" (click)="confirmar()">
+              <i class="bi bi-bag-check me-1"></i> Confirmar pedido
+            </button>
+          } @else {
+            <div class="text-center py-4 text-tenue small">
+              Tu carrito está vacío.<br />
+              <a routerLink="/tienda/catalogo">Ver catálogo</a>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

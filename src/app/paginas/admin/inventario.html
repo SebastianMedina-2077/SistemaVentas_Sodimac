@@ -1,0 +1,90 @@
+<div class="d-flex flex-column gap-3 sv-anim">
+  <!-- Acciones -->
+  <div class="d-flex gap-2 flex-wrap">
+    <button type="button" class="btn btn-primary" (click)="abrir('entrada')"><i class="bi bi-box-arrow-in-down me-1"></i>Registrar entrada</button>
+    <button type="button" class="btn btn-outline-secondary bg-white" (click)="abrir('salida')"><i class="bi bi-box-arrow-up me-1"></i>Registrar salida</button>
+    <button type="button" class="btn btn-outline-secondary bg-white" (click)="abrir('conteo')"><i class="bi bi-clipboard-check me-1"></i>Conteo cíclico</button>
+  </div>
+
+  <!-- Mensaje de éxito -->
+  @if (exito()) {
+    <div class="alert alert-success d-flex align-items-center gap-2 mb-0" role="alert">
+      <i class="bi bi-check-circle-fill"></i><span>{{ exito() }}</span>
+    </div>
+  }
+
+  <!-- Formulario de movimiento -->
+  @if (formVisible()) {
+    <div class="sv-card p-4 sv-anim">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="font-archivo fw-bold fs-6 m-0 text-capitalize">Registrar {{ tipo() }}</h3>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrar()"></button>
+      </div>
+      <form [formGroup]="form" (ngSubmit)="registrar()" novalidate class="row g-3">
+        <div class="col-md-5">
+          <label class="form-label small fw-semibold" for="mv-sku">Producto (SKU)</label>
+          <select id="mv-sku" class="form-select" [class.is-invalid]="invalido('sku')" formControlName="sku">
+            <option value="">Selecciona un producto…</option>
+            @for (p of productos; track p.sku) { <option [value]="p.sku">{{ p.sku }} — {{ p.nombre }}</option> }
+          </select>
+          <div class="invalid-feedback">Selecciona el producto.</div>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label small fw-semibold" for="mv-cant">Cantidad</label>
+          <input id="mv-cant" type="number" min="1" class="form-control" [class.is-invalid]="invalido('cantidad')" formControlName="cantidad" />
+          <div class="invalid-feedback">Ingresa una cantidad de al menos 1.</div>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label small fw-semibold" for="mv-motivo">Motivo / referencia <span class="text-tenue">(opcional)</span></label>
+          <input id="mv-motivo" class="form-control" formControlName="motivo" placeholder="Ej. Orden de compra OC-1204" />
+        </div>
+        <div class="col-12">
+          <button type="submit" class="btn btn-ink px-4"><i class="bi bi-save me-1"></i>Guardar movimiento</button>
+        </div>
+      </form>
+    </div>
+  }
+
+  <!-- Alerta de reposición -->
+  <div class="d-flex align-items-center gap-3 rounded-3 p-3" style="background:#fffbeb;border:1px solid #fde68a">
+    <span class="sv-rol-avatar" style="width:38px;height:38px;background:#f59e0b;font-size:1rem"><i class="bi bi-exclamation-lg"></i></span>
+    <div class="small" style="color:#92400e">
+      <b>{{ alertas }} productos</b> están por debajo del nivel mínimo de stock. Se recomienda generar orden de reposición.
+    </div>
+  </div>
+
+  <!-- Tabla de inventario -->
+  <div class="sv-card overflow-hidden">
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr class="text-uppercase text-tenue small" style="background:#f5f7fa">
+            <th class="fw-semibold px-3 py-3">SKU</th>
+            <th class="fw-semibold py-3">Producto</th>
+            <th class="fw-semibold py-3">Ubicación</th>
+            <th class="fw-semibold py-3 text-end">Stock</th>
+            <th class="fw-semibold py-3 text-end">Mínimo</th>
+            <th class="fw-semibold py-3">Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of productos; track p.sku) {
+            <tr>
+              <td class="px-3 text-suave font-monospace">{{ p.sku }}</td>
+              <td class="fw-semibold">{{ p.nombre }}<div class="small text-tenue fw-normal">{{ p.categoria }}</div></td>
+              <td style="color:#44403c">{{ p.ubicacion }}</td>
+              <td class="text-end fw-bold font-archivo">{{ p.stock }}</td>
+              <td class="text-end text-suave">{{ p.minimo }}</td>
+              <td>
+                <span class="badge rounded-pill d-inline-flex align-items-center gap-1 fw-semibold"
+                      [style.background]="estadoDe(p).fondo" [style.color]="estadoDe(p).color">
+                  <span class="sv-dot" [style.background]="estadoDe(p).punto"></span>{{ estadoDe(p).etiqueta }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
