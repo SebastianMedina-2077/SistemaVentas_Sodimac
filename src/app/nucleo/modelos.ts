@@ -13,11 +13,13 @@ export interface Rol {
   descripcion: string;
   destino: 'tienda' | 'admin';
   moduloInicial: ModuloAdmin | null;
+  /** Módulos del panel a los que el rol tiene acceso. */
+  modulos: ModuloAdmin[];
   color: string;
   inicial: string;
 }
 
-export type ModuloAdmin = 'dashboard' | 'pos' | 'inventario' | 'reportes' | 'devoluciones';
+export type ModuloAdmin = 'dashboard' | 'pos' | 'inventario' | 'reportes' | 'devoluciones' | 'consulta';
 
 /** Producto del catálogo (entidad Producto: SKU, nombre, precio, stock, ubicación). */
 export interface Producto {
@@ -29,6 +31,8 @@ export interface Producto {
   minimo: number;
   categoria: string;
   ubicacion: string;
+  descripcion: string; // para qué sirve el producto
+  caracteristicas: string[]; // ficha técnica resumida
   imagen: string; // ruta de la imagen del producto (luego vendrá de la BD)
   tinte: string; // color de fondo de la miniatura
   tinta: string; // color de acento de la categoría

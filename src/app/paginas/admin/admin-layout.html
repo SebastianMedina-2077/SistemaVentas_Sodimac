@@ -9,7 +9,7 @@
       Módulos
     </div>
     <nav class="d-flex flex-column gap-1">
-      @for (item of items; track item.ruta) {
+      @for (item of items(); track item.ruta) {
         <a
           class="sv-nav-link"
           [routerLink]="['/admin', item.ruta]"

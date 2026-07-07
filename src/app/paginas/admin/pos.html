@@ -18,7 +18,7 @@
         <button type="button" class="btn btn-ink" (click)="agregarPorSku()">Agregar</button>
         <div class="invalid-feedback">{{ errorSku() }}</div>
       </div>
-      <div class="form-text">Toca un producto para agregarlo o ingresa su SKU y presiona Enter.</div>
+      <div class="form-text">Escanea el código, escribe el SKU y presiona Enter, o toca un producto de la lista.</div>
     </div>
 
     <div class="row g-2">
@@ -43,7 +43,9 @@
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="font-archivo fw-bold fs-6 m-0">Venta actual</h3>
         @if (hayItems()) {
-          <button type="button" class="btn btn-link btn-sm text-tenue p-0 text-decoration-underline" (click)="limpiar()">Limpiar</button>
+          <button type="button" class="btn btn-link btn-sm sv-enlace text-tenue px-2 py-1" (click)="limpiar()">
+            <i class="bi bi-x-lg me-1"></i>Vaciar
+          </button>
         }
       </div>
 
