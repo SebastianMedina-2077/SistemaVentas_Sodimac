@@ -1,5 +1,6 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CATEGORIAS } from '../../nucleo/datos';
 import { InventarioService } from '../../nucleo/inventario.service';
 import { Producto } from '../../nucleo/modelos';
 
@@ -14,8 +15,21 @@ export class Inventario {
   private readonly fb = inject(FormBuilder);
   private readonly inventario = inject(InventarioService);
 
-  readonly productos = this.inventario.productos;
-  readonly alertas = this.inventario.alertas().length;
+  readonly categorias = CATEGORIAS;
+  readonly filtroCategoria = signal('Todos');
+
+  get productos(): Producto[] {
+    return this.inventario.productos;
+  }
+  get alertas(): number {
+    return this.inventario.alertas().length;
+  }
+
+  readonly productosFiltrados = computed(() => {
+    const cat = this.filtroCategoria();
+    const todos = this.inventario.productos;
+    return cat === 'Todos' ? todos : todos.filter((p) => p.categoria === cat);
+  });
 
   readonly formVisible = signal(false);
   readonly tipo = signal<TipoMov>('entrada');

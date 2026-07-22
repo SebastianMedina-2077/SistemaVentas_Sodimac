@@ -1,10 +1,11 @@
-import { Injectable, computed, signal } from '@angular/core';
-import { PRODUCTOS } from './datos';
+import { Injectable, computed, inject, signal } from '@angular/core';
+import { CatalogoService } from './catalogo.service';
 import { Producto } from './modelos';
 
 /** Estado del catálogo compartido entre el topbar (búsqueda) y la grilla de productos. */
 @Injectable({ providedIn: 'root' })
 export class TiendaService {
+  private readonly catalogo = inject(CatalogoService);
   readonly busqueda = signal('');
   readonly categoria = signal('Todos');
 
@@ -12,7 +13,7 @@ export class TiendaService {
   readonly productos = computed<Producto[]>(() => {
     const q = this.busqueda().trim().toLowerCase();
     const cat = this.categoria();
-    return PRODUCTOS.filter((p) => {
+    return this.catalogo.productos().filter((p) => {
       const coincideCat = cat === 'Todos' || p.categoria === cat;
       const coincideTexto =
         !q ||

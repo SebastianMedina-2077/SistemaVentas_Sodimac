@@ -1,5 +1,4 @@
 <div class="container-xl py-4 sv-anim">
-  <!-- Hero -->
   <div class="rounded-4 p-4 p-md-5 text-white mb-4 position-relative overflow-hidden"
        style="background:linear-gradient(105deg,#16202b,#0a4a86)">
     <div class="position-absolute" style="right:-40px;top:-40px;width:260px;height:260px;border-radius:50%;background:radial-gradient(circle,#0091d066,transparent 70%)"></div>
@@ -15,7 +14,6 @@
     </div>
   </div>
 
-  <!-- Chips de categoría -->
   <div class="d-flex gap-2 flex-wrap mb-4">
     @for (c of categorias; track c) {
       <button type="button" class="sv-chip" [class.activo]="tienda.categoria() === c" (click)="setCategoria(c)">
@@ -24,14 +22,13 @@
     }
   </div>
 
-  <!-- Grilla -->
   @if (productos().length) {
     <div class="row g-3">
       @for (p of productos(); track p.sku) {
         <div class="col-6 col-md-4 col-lg-3">
           <div class="sv-card sv-producto h-100 d-flex flex-column">
             <div class="sv-producto-img" [style.background]="p.tinte">
-              <img [src]="p.imagen" [alt]="p.nombre" loading="lazy" />
+              <sv-imagen [src]="p.imagen" [fallback]="p.imagenLocal" [alt]="p.nombre" />
               <span class="position-absolute top-0 start-0 m-2 badge rounded-1 text-suave font-monospace"
                     style="background:#ffffffe6">{{ p.sku }}</span>
               @if (agotado(p)) {

@@ -1,0 +1,127 @@
+<div class="d-flex flex-column gap-3 sv-anim" style="padding-bottom:5rem">
+  <div class="sv-card p-3 d-flex flex-wrap gap-2 align-items-center">
+    <div class="position-relative flex-grow-1" style="min-width:220px">
+      <i class="bi bi-search position-absolute text-tenue" style="left:14px;top:10px"></i>
+      <input
+        #campoBusqueda
+        type="search"
+        class="form-control ps-5"
+        [value]="filtro()"
+        (input)="filtro.set($any($event.target).value)"
+        placeholder="Buscar producto por nombre, SKU o marca"
+        aria-label="Buscar producto"
+      />
+    </div>
+    <button type="button" class="btn btn-primary" (click)="nuevo()"><i class="bi bi-plus-lg me-1"></i>Nuevo producto</button>
+  </div>
+
+  <div class="row g-3">
+    @for (p of filtrados(); track p.sku) {
+      <div class="col-6 col-md-4 col-xl-3">
+        <div class="sv-card sv-producto h-100 d-flex flex-column overflow-hidden">
+          <div class="sv-producto-img" [style.background]="p.tinte">
+            <sv-imagen [src]="p.imagen" [fallback]="p.imagenLocal" [alt]="p.nombre" />
+            <span class="position-absolute top-0 start-0 m-2 badge rounded-1 text-suave font-monospace" style="background:#ffffffe6">{{ p.sku }}</span>
+          </div>
+          <div class="p-3 d-flex flex-column flex-grow-1">
+            <div class="text-uppercase text-tenue fw-semibold mb-1" style="font-size:.62rem;letter-spacing:.06em">{{ p.marca }}</div>
+            <div class="fw-semibold mb-2" style="font-size:.85rem;line-height:1.3;min-height:34px">{{ p.nombre }}</div>
+            <div class="d-flex align-items-center justify-content-between mt-auto">
+              <span class="font-archivo fw-bold">{{ p.precio | soles }}</span>
+              <button type="button" class="btn btn-outline-secondary btn-sm" (click)="editar(p)"><i class="bi bi-pencil me-1"></i>Editar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    } @empty {
+      <div class="col-12">
+        <div class="sv-card text-center p-5 text-suave">No hay productos que coincidan con «{{ filtro() }}».</div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Modal de edición -->
+@if (editando(); as ed) {
+  <div class="sv-dialogo-fondo" (click)="cerrar()">
+    <div class="sv-dialogo sv-anim" style="max-width:560px" role="dialog" aria-modal="true" aria-label="Editar producto"
+         (click)="$event.stopPropagation()" (keydown.escape)="cerrar()">
+      <div class="d-flex justify-content-between align-items-start mb-3">
+        <h2 class="fs-5 fw-bold font-archivo m-0">{{ ed === 'nuevo' ? 'Nuevo producto' : 'Editar producto' }}</h2>
+        <button type="button" class="btn-close" aria-label="Cerrar" (click)="cerrar()"></button>
+      </div>
+
+      <div class="d-flex gap-3 mb-3">
+        <div class="rounded-3 overflow-hidden flex-shrink-0" style="width:96px;height:96px;background:#f5f7fa">
+          <sv-imagen [src]="fImagen()" [fallback]="metaImagen()" alt="Vista previa" />
+        </div>
+        <div class="flex-grow-1">
+          <label class="form-label small fw-semibold" for="p-img">URL de imagen</label>
+          <input #campoImagen id="p-img" class="form-control form-control-sm" [ngModel]="fImagen()" (ngModelChange)="fImagen.set($event)" placeholder="https://…" />
+          <div class="form-text">Si la URL falla, se usa la ilustración de la categoría.</div>
+        </div>
+      </div>
+
+      <div class="row g-2">
+        <div class="col-12">
+          <label class="form-label small fw-semibold" for="p-nombre">Nombre</label>
+          <input id="p-nombre" class="form-control" [ngModel]="fNombre()" (ngModelChange)="fNombre.set($event)" placeholder="Nombre del producto" />
+        </div>
+        <div class="col-6">
+          <label class="form-label small fw-semibold" for="p-marca">Marca</label>
+          <input id="p-marca" class="form-control" [ngModel]="fMarca()" (ngModelChange)="fMarca.set($event)" placeholder="Marca" />
+        </div>
+        <div class="col-6">
+          <label class="form-label small fw-semibold" for="p-precio">Precio (S/)</label>
+          <input id="p-precio" type="number" min="0" step="0.10" class="form-control" [ngModel]="fPrecio()" (ngModelChange)="fPrecio.set(+$event)" />
+        </div>
+        <div class="col-6">
+          <label class="form-label small fw-semibold" for="p-cat">Categoría</label>
+          <select id="p-cat" class="form-select" [ngModel]="fCategoria()" (ngModelChange)="fCategoria.set($event)">
+            @for (c of categorias; track c) { <option [value]="c">{{ c }}</option> }
+          </select>
+        </div>
+        <div class="col-6">
+          <label class="form-label small fw-semibold" for="p-ubi">Ubicación</label>
+          <input id="p-ubi" class="form-control" [ngModel]="fUbicacion()" (ngModelChange)="fUbicacion.set($event)" placeholder="Ej. Pasillo 7-A" />
+        </div>
+        <div class="col-6">
+          <label class="form-label small fw-semibold" for="p-gon">Stock góndola</label>
+          <input id="p-gon" type="number" min="0" class="form-control" [ngModel]="fGondola()" (ngModelChange)="fGondola.set(+$event)" />
+        </div>
+        <div class="col-6">
+          <label class="form-label small fw-semibold" for="p-alm">Stock almacén</label>
+          <input id="p-alm" type="number" min="0" class="form-control" [ngModel]="fAlmacen()" (ngModelChange)="fAlmacen.set(+$event)" />
+        </div>
+        <div class="col-12">
+          <label class="form-label small fw-semibold" for="p-desc">Descripción</label>
+          <textarea id="p-desc" rows="2" class="form-control" [ngModel]="fDescripcion()" (ngModelChange)="fDescripcion.set($event)" placeholder="Para qué sirve el producto"></textarea>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button type="button" class="btn btn-outline-secondary" (click)="cerrar()">Cancelar</button>
+        <button type="button" class="btn btn-primary" (click)="guardar()"><i class="bi bi-check-lg me-1"></i>Guardar</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Barra flotante de acciones rápidas -->
+<div class="sv-fab-bar">
+  <button type="button" class="sv-fab sv-fab-primary" (click)="nuevo()" aria-label="Nuevo producto" title="Nuevo producto">
+    <i class="bi bi-plus-lg"></i>
+  </button>
+  <button type="button" class="sv-fab" (click)="enfocarBusqueda()" aria-label="Buscar" title="Buscar">
+    <i class="bi bi-search"></i>
+  </button>
+  <button type="button" class="sv-fab" (click)="enfocarImagen()" aria-label="Cambiar imagen" title="Cambiar imagen">
+    <i class="bi bi-image"></i>
+  </button>
+  <button type="button" class="sv-fab" (click)="verTotal()" aria-label="Total de productos" title="Total de productos">
+    <i class="bi bi-collection"></i>
+  </button>
+  <button type="button" class="sv-fab" (click)="mas()" aria-label="Más acciones" title="Más">
+    <i class="bi bi-three-dots"></i>
+  </button>
+</div>

@@ -1,46 +1,94 @@
-<div class="d-flex min-vh-100">
-  <!-- Sidebar -->
+<div class="sv-admin d-flex">
+  <!-- Sidebar (escritorio) -->
   <aside class="sv-sidebar d-none d-lg-flex">
-    <div class="bg-white rounded-3 p-2 px-3 mb-4 mx-1">
-      <img src="img/sodimac-logo.png" alt="Sodimac" style="height:34px;width:auto" />
-    </div>
+    <a routerLink="/admin" class="sv-brand mb-4">
+      <span class="sv-brand-badge"><img src="img/sodimac-logo.png" alt="Sodimac" /></span>
+      <span class="sv-brand-nombre">sodimac</span>
+    </a>
+    <ng-container [ngTemplateOutlet]="navTpl"></ng-container>
+    <ng-container [ngTemplateOutlet]="sesionTpl"></ng-container>
+  </aside>
 
-    <div class="text-uppercase tracking-wide fw-semibold px-2 mb-2" style="color:#57534e;font-size:.7rem">
-      Módulos
-    </div>
-    <nav class="d-flex flex-column gap-1">
-      @for (item of items(); track item.ruta) {
-        <a
-          class="sv-nav-link"
-          [routerLink]="['/admin', item.ruta]"
-          routerLinkActive="activo"
-        >
-          <i class="bi {{ item.icono }}"></i>
-          {{ item.nombre }}
-        </a>
-      }
-    </nav>
-
-    <div class="mt-auto border-top pt-3" style="border-color:#292524 !important">
-      <div class="small text-tenue px-2 pb-2">Sesión: <b class="text-white">{{ nombreRol() }}</b></div>
-      <button type="button" class="sv-nav-link w-100" style="background:#292524" (click)="salir()">
-        <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+  <!-- Drawer (móvil) -->
+  @if (menuAbierto()) {
+    <div class="sv-scrim d-lg-none" (click)="cerrarMenu()"></div>
+  }
+  <aside
+    id="sv-drawer"
+    class="sv-drawer d-lg-none"
+    [class.abierto]="menuAbierto()"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Menú de navegación"
+    (keydown.escape)="cerrarMenu()"
+  >
+    <div class="d-flex align-items-center justify-content-between mb-4">
+      <span class="sv-brand">
+        <span class="sv-brand-badge"><img src="img/sodimac-logo.png" alt="Sodimac" /></span>
+        <span class="sv-brand-nombre">sodimac</span>
+      </span>
+      <button type="button" class="btn btn-sm text-white p-1" (click)="cerrarMenu()" aria-label="Cerrar menú">
+        <i class="bi bi-x-lg fs-5"></i>
       </button>
     </div>
+    <ng-container [ngTemplateOutlet]="navTpl"></ng-container>
+    <ng-container [ngTemplateOutlet]="sesionTpl"></ng-container>
   </aside>
 
   <!-- Contenido -->
-  <main class="flex-grow-1 d-flex flex-column" style="background:#f5f7fa;min-width:0">
-    <header class="bg-white border-bottom d-flex align-items-center justify-content-between px-4 py-3 sticky-top" style="z-index:10">
-      <h1 class="font-archivo fw-bold m-0 fs-4" style="letter-spacing:-.01em">{{ titulo() }}</h1>
+  <main class="flex-grow-1 d-flex flex-column" style="background:#f5f7fa;min-width:0;min-height:0">
+    <header class="d-flex align-items-center justify-content-between px-3 px-md-4 py-3 sv-topbar flex-shrink-0" style="z-index:10">
+      <div class="d-flex align-items-center gap-2" style="min-width:0">
+        <button
+          #botonMenu
+          type="button"
+          class="sv-hamburguesa d-lg-none"
+          (click)="abrirMenu()"
+          [attr.aria-expanded]="menuAbierto()"
+          aria-controls="sv-drawer"
+          aria-label="Abrir menú de navegación"
+        >
+          <span></span><span></span><span></span>
+        </button>
+        <h1 class="font-archivo fw-bold m-0 fs-4 text-truncate" style="letter-spacing:-.01em">{{ titulo() }}</h1>
+      </div>
       <div class="d-flex align-items-center gap-3 small text-suave">
         <span class="d-none d-md-inline">Tienda Homecenter · Lima Norte</span>
         <span class="sv-rol-avatar" style="width:38px;height:38px;background:var(--sv-azul);font-size:.9rem">{{ iniciales() }}</span>
       </div>
     </header>
 
-    <div class="p-4 flex-grow-1">
+    <div class="sv-admin-contenido flex-grow-1 p-3 p-md-4">
       <router-outlet />
     </div>
+
+    <footer class="border-top text-tenue px-4 py-2 d-flex flex-wrap justify-content-between align-items-center gap-2 flex-shrink-0 bg-white" style="font-size:.78rem">
+      <span>© {{ anio }} Sodimac Perú · Sistema de Ventas</span>
+      <span class="d-none d-sm-inline">Uso interno — Tienda Homecenter Lima Norte</span>
+    </footer>
   </main>
 </div>
+
+<!-- Navegación reutilizada por sidebar y drawer -->
+<ng-template #navTpl>
+  <nav class="d-flex flex-column gap-1 flex-grow-1 overflow-auto">
+    @for (g of grupos(); track g.grupo) {
+      <div class="sv-nav-grupo">{{ g.grupo }}</div>
+      @for (item of g.items; track item.ruta) {
+        <a class="sv-nav-link" [routerLink]="['/admin', item.ruta]" routerLinkActive="activo" (click)="cerrarMenu()">
+          <i class="bi {{ item.icono }}"></i>
+          {{ item.nombre }}
+        </a>
+      }
+    }
+  </nav>
+</ng-template>
+
+<ng-template #sesionTpl>
+  <div class="mt-auto border-top pt-3" style="border-color:#2a3947 !important">
+    <div class="small text-tenue px-2 pb-2">Sesión: <b class="text-white">{{ nombreRol() }}</b></div>
+    <button type="button" class="sv-nav-link w-100" style="background:#22303d" (click)="salir()">
+      <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+    </button>
+  </div>
+</ng-template>

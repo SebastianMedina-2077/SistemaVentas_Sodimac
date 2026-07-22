@@ -1,0 +1,63 @@
+<label
+  [attr.for]="idBase + '-in'"
+  class="form-label fw-semibold small"
+  [class.visually-hidden]="!mostrarEtiqueta()"
+  >{{ etiqueta() }}</label
+>
+
+<div class="sv-combo">
+  <div class="input-group">
+    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+    <input
+      #entrada
+      [id]="idBase + '-in'"
+      type="text"
+      role="combobox"
+      class="form-control"
+      autocomplete="off"
+      aria-autocomplete="list"
+      aria-haspopup="listbox"
+      [attr.aria-expanded]="abierto()"
+      [attr.aria-controls]="listboxId"
+      [attr.aria-activedescendant]="activedescendant()"
+      [placeholder]="placeholder()"
+      [value]="texto()"
+      (input)="alEscribir($any($event.target).value)"
+      (focus)="alEnfocar()"
+      (keydown)="teclado($event)"
+    />
+  </div>
+
+  @if (abierto() && filtradas().length) {
+    <ul class="sv-combo-lista" [id]="listboxId" role="listbox" [attr.aria-label]="etiqueta()">
+      @for (op of filtradas(); track op.id; let i = $index) {
+        <li
+          class="sv-combo-opcion"
+          [id]="opcionId(i)"
+          role="option"
+          [class.activo]="activo() === i"
+          [attr.aria-selected]="activo() === i"
+          (mousedown)="$event.preventDefault()"
+          (mousemove)="activo.set(i)"
+          (click)="elegir(op)"
+        >
+          @if (op.imagen) {
+            <span class="sv-combo-img"><img [src]="op.imagen" alt="" (error)="$any($event.target).style.visibility = 'hidden'" /></span>
+          } @else if (op.icono) {
+            <i class="bi {{ op.icono }} sv-combo-ico"></i>
+          }
+          <span class="flex-grow-1" style="min-width: 0">
+            <span class="d-block fw-semibold text-truncate">{{ op.etiqueta }}</span>
+            @if (op.sub) {
+              <span class="d-block small text-tenue text-truncate">{{ op.sub }}</span>
+            }
+          </span>
+        </li>
+      }
+    </ul>
+  } @else if (abierto() && texto().trim()) {
+    <ul class="sv-combo-lista" [id]="listboxId" role="listbox" [attr.aria-label]="etiqueta()">
+      <li class="sv-combo-vacio" role="option" aria-disabled="true">Sin coincidencias</li>
+    </ul>
+  }
+</div>

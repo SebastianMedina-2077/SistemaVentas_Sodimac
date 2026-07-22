@@ -1,77 +1,149 @@
-<div class="d-flex flex-column gap-3 sv-anim">
-  <!-- Buscador -->
-  <div class="sv-card p-3">
-    <label class="form-label small fw-semibold mb-1" for="q-consulta">Buscar producto</label>
-    <div class="input-group">
-      <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-      <input
-        id="q-consulta"
-        type="search"
-        class="form-control"
-        [value]="termino()"
-        (input)="buscar($any($event.target).value)"
-        placeholder="Nombre, SKU, marca o categoría (ej. taladro, FER-001, pinturas)"
-        autocomplete="off"
-      />
-    </div>
-    <div class="form-text">
+<div class="sv-consulta d-flex flex-column gap-3 sv-anim">
+  <div class="sv-card p-3 flex-shrink-0">
+    <sv-combobox
+      etiqueta="Buscar producto"
+      placeholder="Nombre, SKU, marca o categoría (ej. taladro, FER-001, pinturas)"
+      [opciones]="opciones()"
+      (buscar)="buscar($event)"
+      (seleccion)="verDetalle($event.id)"
+    ></sv-combobox>
+    <div class="form-text mt-2">
       {{ resultados().length }} {{ resultados().length === 1 ? 'producto' : 'productos' }} · solo consulta, sin ventas ni edición.
     </div>
   </div>
 
-  <!-- Resultados -->
-  @if (resultados().length) {
-    <div class="row g-3">
-      @for (p of resultados(); track p.sku) {
-        <div class="col-12 col-xl-6">
-          <article class="sv-card h-100 p-3 d-flex gap-3">
-            <div class="rounded-3 overflow-hidden flex-shrink-0" style="width:96px;height:96px" [style.background]="p.tinte">
-              <img [src]="p.imagen" [alt]="p.nombre" loading="lazy" style="width:100%;height:100%;object-fit:cover" />
-            </div>
+  <div class="sv-consulta-panes row g-3">
+    <!-- Panel lista: scroll interno con cabeceras de categoría fijas -->
+    <div class="col-12 col-xl-6 sv-consulta-pane">
+      <div class="sv-card h-100 d-flex flex-column overflow-hidden p-0">
+        @if (resultados().length) {
+          <div class="sv-lista-scroll flex-grow-1 p-3">
+            @for (grupo of grupos(); track grupo.categoria) {
+              <div class="sv-grupo-cab">{{ grupo.categoria }} · {{ grupo.items.length }}</div>
+              <div class="d-flex flex-column gap-2 mb-3">
+                @for (p of grupo.items; track p.sku) {
+                  <button
+                    type="button"
+                    class="sv-item-prod"
+                    [class.activo]="seleccionado()?.sku === p.sku"
+                    (click)="verDetalle(p.sku)"
+                  >
+                    <img [src]="p.imagen" [alt]="p.nombre" loading="lazy" (error)="$any($event.target).src = p.imagenLocal" />
+                    <span class="flex-grow-1 text-start" style="min-width: 0">
+                      <span class="d-block fw-semibold text-truncate">{{ p.nombre }}</span>
+                      <span class="d-block small text-tenue">{{ p.sku }} · {{ p.precio | soles }}</span>
+                    </span>
+                    <span class="d-inline-flex align-items-center gap-1 small text-suave flex-shrink-0">
+                      <span class="sv-dot" [style.background]="estadoDe(p).punto"></span>{{ p.stock }}
+                    </span>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="text-center p-5 text-suave m-auto">
+            <i class="bi bi-search fs-1 d-block mb-2 text-tenue"></i>
+            No encontramos productos que coincidan con «{{ termino() }}».
+            <div class="small text-tenue mt-1">Prueba con otro nombre, SKU o categoría.</div>
+          </div>
+        }
+      </div>
+    </div>
 
-            <div class="flex-grow-1" style="min-width:0">
-              <div class="d-flex justify-content-between align-items-start gap-2">
-                <div>
-                  <div class="text-uppercase text-tenue fw-semibold" style="font-size:.65rem;letter-spacing:.06em">{{ p.marca }}</div>
-                  <h3 class="fw-semibold fs-6 mb-1">{{ p.nombre }}</h3>
+    <!-- Panel detalle: skeleton mientras carga, luego la ficha -->
+    <div class="col-12 col-xl-6 sv-consulta-pane">
+      <div class="sv-card h-100 d-flex flex-column overflow-hidden">
+        @if (cargando()) {
+          <!-- Región de carga: geometría preservada con skeleton -->
+          <div class="p-4 flex-grow-1" role="status" aria-busy="true" aria-live="polite">
+            <span class="visually-hidden">Cargando la ficha del producto…</span>
+            <div class="d-flex gap-3 mb-3">
+              <div class="sv-skel" style="width: 120px; height: 120px; border-radius: 0.75rem"></div>
+              <div class="flex-grow-1 d-flex flex-column gap-2">
+                <div class="sv-skel" style="width: 40%; height: 12px"></div>
+                <div class="sv-skel" style="width: 80%; height: 20px"></div>
+                <div class="sv-skel" style="width: 30%; height: 26px"></div>
+              </div>
+            </div>
+            <div class="sv-skel mb-2" style="width: 100%; height: 12px"></div>
+            <div class="sv-skel mb-2" style="width: 92%; height: 12px"></div>
+            <div class="sv-skel mb-4" style="width: 70%; height: 12px"></div>
+            <div class="d-flex justify-content-center py-3">
+              <sv-spinner etiqueta="Cargando ficha" [tamano]="44"></sv-spinner>
+            </div>
+          </div>
+        } @else if (seleccionado(); as p) {
+          <div class="sv-lista-scroll flex-grow-1 p-4">
+            <div class="d-flex gap-3 mb-3">
+              <div class="rounded-3 overflow-hidden flex-shrink-0" style="width: 120px; height: 120px" [style.background]="p.tinte">
+                <sv-imagen [src]="p.imagen" [fallback]="p.imagenLocal" [alt]="p.nombre" />
+              </div>
+              <div class="flex-grow-1" style="min-width: 0">
+                <div class="text-uppercase text-tenue fw-semibold" style="font-size: 0.65rem; letter-spacing: 0.06em">{{ p.marca }}</div>
+                <h2 class="fw-bold fs-5 mb-1 font-archivo">{{ p.nombre }}</h2>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                  <span class="font-archivo fw-bold fs-4">{{ p.precio | soles }}</span>
+                  <span class="badge rounded-pill bg-body-secondary text-dark">{{ p.categoria }}</span>
                 </div>
-                <span class="badge rounded-1 text-suave font-monospace" style="background:#f5f7fa">{{ p.sku }}</span>
               </div>
-
-              <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
-                <span class="font-archivo fw-bold fs-5">{{ p.precio | soles }}</span>
-                <span class="text-tenue small">· {{ p.categoria }}</span>
-              </div>
-
-              <!-- Stock: color + texto + unidades (no solo color) -->
-              <div class="d-flex align-items-center gap-2 flex-wrap mb-2">
-                <span class="badge rounded-pill d-inline-flex align-items-center gap-1 fw-semibold"
-                      [style.background]="estadoDe(p).fondo" [style.color]="estadoDe(p).color">
-                  <span class="sv-dot" [style.background]="estadoDe(p).punto"></span>{{ estadoDe(p).etiqueta }}
-                </span>
-                <span class="small text-suave"><b>{{ p.stock }}</b> unidades disponibles</span>
-                <span class="small text-tenue"><i class="bi bi-geo-alt me-1"></i>{{ p.ubicacion }}</span>
-              </div>
-
-              <p class="small text-suave mb-2" style="line-height:1.5">{{ p.descripcion }}</p>
-
-              @if (p.caracteristicas.length) {
-                <ul class="list-unstyled small text-suave mb-0 d-flex flex-column gap-1">
-                  @for (c of p.caracteristicas; track c) {
-                    <li><i class="bi bi-check2 text-primary me-1"></i>{{ c }}</li>
-                  }
-                </ul>
-              }
             </div>
-          </article>
-        </div>
-      }
+
+            <div class="d-flex align-items-center gap-2 flex-wrap mb-3">
+              <span
+                class="badge rounded-pill d-inline-flex align-items-center gap-1 fw-semibold"
+                [style.background]="estadoDe(p).fondo"
+                [style.color]="estadoDe(p).color"
+              >
+                <span class="sv-dot" [style.background]="estadoDe(p).punto"></span>{{ estadoDe(p).etiqueta }}
+              </span>
+              <span class="small text-suave"><b>{{ p.stockGondola }}</b> en góndola · <b>{{ p.stockAlmacen }}</b> en almacén</span>
+              <span class="small text-tenue"><i class="bi bi-geo-alt me-1"></i>{{ p.ubicacion }}</span>
+              <span class="small text-tenue font-monospace">{{ p.sku }}</span>
+            </div>
+
+            <button type="button" class="btn btn-outline-primary btn-sm mb-3" (click)="solicitar(p)">
+              <i class="bi bi-send me-1"></i> Solicitar a logística
+            </button>
+
+            <h3 class="text-uppercase text-tenue fw-semibold mb-1" style="font-size: 0.68rem; letter-spacing: 0.06em">Para qué sirve</h3>
+            <p class="text-suave" style="line-height: 1.6">{{ p.descripcion }}</p>
+
+            @if (p.caracteristicas.length) {
+              <h3 class="text-uppercase text-tenue fw-semibold mb-2 mt-3" style="font-size: 0.68rem; letter-spacing: 0.06em">Características</h3>
+              <ul class="list-unstyled small text-suave d-flex flex-column gap-1 mb-0">
+                @for (c of p.caracteristicas; track c) {
+                  <li><i class="bi bi-check2 text-primary me-1"></i>{{ c }}</li>
+                }
+              </ul>
+            }
+
+            @if (recomendaciones().length) {
+              <h3 class="text-uppercase text-tenue fw-semibold mb-2 mt-4" style="font-size: 0.68rem; letter-spacing: 0.06em">
+                Recomendaciones de {{ p.categoria }}
+              </h3>
+              <div class="row g-2">
+                @for (r of recomendaciones(); track r.sku) {
+                  <div class="col-6">
+                    <button type="button" class="sv-item-prod" (click)="verDetalle(r.sku)">
+                      <img [src]="r.imagen" [alt]="r.nombre" loading="lazy" (error)="$any($event.target).src = r.imagenLocal" />
+                      <span class="flex-grow-1 text-start" style="min-width: 0">
+                        <span class="d-block small fw-semibold text-truncate">{{ r.nombre }}</span>
+                        <span class="d-block text-tenue" style="font-size: 0.72rem">{{ r.precio | soles }}</span>
+                      </span>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="text-center p-5 text-suave m-auto">
+            <i class="bi bi-box-arrow-in-left fs-1 d-block mb-2 text-tenue"></i>
+            Selecciona un producto de la lista para ver su ficha completa.
+          </div>
+        }
+      </div>
     </div>
-  } @else {
-    <div class="sv-card text-center p-5 text-suave">
-      <i class="bi bi-search fs-1 d-block mb-2 text-tenue"></i>
-      No encontramos productos que coincidan con «{{ termino() }}».
-      <div class="small text-tenue mt-1">Prueba con otro nombre, SKU o categoría.</div>
-    </div>
-  }
+  </div>
 </div>

@@ -1,32 +1,49 @@
 <div class="sv-login row g-0">
-  <!-- Panel de marca -->
-  <div class="col-lg-6 sv-login-marca d-none d-lg-flex flex-column justify-content-between p-5">
-    <div class="bg-white rounded-3 p-2 px-3 shadow-sm align-self-start">
-      <img src="img/sodimac-logo.png" alt="Sodimac" style="height:46px;width:auto" />
+  <div class="col-lg-6 sv-login-marca d-none d-lg-flex flex-column justify-content-between p-5 position-relative">
+    <div class="sv-brand align-self-start position-relative">
+      <span class="sv-brand-badge"><img src="img/sodimac-logo.png" alt="Sodimac" /></span>
+      <span class="sv-brand-nombre">sodimac</span>
     </div>
 
-    <div>
+    <div class="position-relative">
       <div class="text-uppercase tracking-wide fw-semibold mb-3" style="color:#7cc4f2;font-size:.8rem">
-        Sistema de ventas
+        Sistema de ventas omnicanal
       </div>
-      <h1 class="font-archivo fw-bold mb-3" style="font-size:2.6rem;line-height:1.05;letter-spacing:-.02em">
-        Todo tu día en<br />un solo lugar
+      <h1 class="font-archivo fw-bold mb-3" style="font-size:2.9rem;line-height:1.03;letter-spacing:-.025em">
+        Toda la tienda,<br />en un solo lugar
       </h1>
-      <p class="text-tenue mb-0" style="max-width:440px;line-height:1.6">
-        Ventas, stock, reportes y la tienda online, conectados. Ingresa con tu usuario para
-        entrar directo a lo tuyo.
+      <p class="text-tenue mb-4" style="max-width:440px;line-height:1.6">
+        Caja, inventario, reportes y la tienda online, conectados. Ingresa con tu usuario y
+        entra directo a lo tuyo.
       </p>
+
+      <div class="sv-login-glass" style="max-width:440px">
+        <div class="text-uppercase fw-semibold mb-3" style="color:#cfe6f8;font-size:.68rem;letter-spacing:.09em">
+          Con una sola cuenta
+        </div>
+        <div class="d-flex flex-column gap-3">
+          <div class="sv-login-item">
+            <i class="bi bi-upc-scan"></i>
+            <span class="text-tenue small">Cobra rápido en caja y emite tu comprobante al instante.</span>
+          </div>
+          <div class="sv-login-item">
+            <i class="bi bi-box-seam"></i>
+            <span class="text-tenue small">Consulta stock en góndola y almacén en tiempo real.</span>
+          </div>
+          <div class="sv-login-item">
+            <i class="bi bi-bar-chart"></i>
+            <span class="text-tenue small">Revisa tus reportes de ventas cuando los necesites.</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="text-tenue small">
-      Tienda Homecenter · Lima Norte
-    </div>
+    <div class="text-tenue small position-relative">Tienda Homecenter · Lima Norte</div>
   </div>
 
-  <!-- Formulario -->
   <div class="col-lg-6 d-flex align-items-center justify-content-center p-4 p-md-5">
     <div class="w-100 sv-anim" style="max-width:420px">
-      <!-- Logo visible en móvil (el panel de marca se oculta) -->
+      <!-- Logo solo en móvil (el panel de marca se oculta) -->
       <img src="img/sodimac-logo.png" alt="Sodimac" class="d-lg-none mb-4" style="height:44px;width:auto" />
 
       <div class="sv-card overflow-hidden shadow-sm">
@@ -35,7 +52,6 @@
           <h2 class="font-archivo fw-bold mb-1" style="letter-spacing:-.01em">Iniciar sesión</h2>
           <p class="text-suave mb-4">Usa tu usuario y contraseña de siempre.</p>
 
-          <!-- Mensaje de credenciales inválidas -->
           @if (errorAcceso()) {
             <div class="alert alert-danger d-flex align-items-start gap-2 py-2 px-3 small" role="alert" aria-live="assertive">
               <i class="bi bi-exclamation-triangle-fill mt-1"></i>
@@ -44,7 +60,6 @@
           }
 
           <form [formGroup]="form" (ngSubmit)="ingresar()" novalidate>
-            <!-- Usuario -->
             <div class="mb-3">
               <label for="usuario" class="form-label fw-semibold small">Usuario</label>
               <div class="input-group has-validation">
@@ -63,7 +78,6 @@
               </div>
             </div>
 
-            <!-- Contraseña -->
             <div class="mb-4">
               <label for="clave" class="form-label fw-semibold small">Contraseña</label>
               <div class="input-group has-validation">
@@ -91,8 +105,26 @@
               </div>
             </div>
 
-            <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">
-              <i class="bi bi-box-arrow-in-right me-1"></i> Ingresar
+            <div class="d-flex align-items-center justify-content-between mb-4">
+              <div class="form-check mb-0">
+                <input class="form-check-input" type="checkbox" id="recordar" />
+                <label class="form-check-label small text-suave" for="recordar">Mantener sesión iniciada</label>
+              </div>
+              <a href="#" class="sv-enlace small text-primary" (click)="$event.preventDefault()">¿Olvidaste tu contraseña?</a>
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-primary w-100 py-2 fw-bold d-inline-flex align-items-center justify-content-center gap-2"
+              [disabled]="cargando()"
+            >
+              @if (cargando()) {
+                <sv-spinner [tamano]="20" [grosor]="5" [claro]="true" etiqueta="Ingresando"></sv-spinner>
+                <span>Ingresando…</span>
+              } @else {
+                <i class="bi bi-box-arrow-in-right"></i>
+                <span>Ingresar</span>
+              }
             </button>
           </form>
         </div>
