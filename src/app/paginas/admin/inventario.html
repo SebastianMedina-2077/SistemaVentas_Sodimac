@@ -1,19 +1,29 @@
 <div class="d-flex flex-column gap-3 sv-anim">
-  <!-- Acciones -->
-  <div class="d-flex gap-2 flex-wrap">
+  <div class="d-flex gap-2 flex-wrap align-items-center">
     <button type="button" class="btn btn-primary" (click)="abrir('entrada')"><i class="bi bi-box-arrow-in-down me-1"></i>Registrar entrada</button>
     <button type="button" class="btn btn-outline-secondary bg-white" (click)="abrir('salida')"><i class="bi bi-box-arrow-up me-1"></i>Registrar salida</button>
     <button type="button" class="btn btn-outline-secondary bg-white" (click)="abrir('conteo')"><i class="bi bi-clipboard-check me-1"></i>Conteo cíclico</button>
+
+    <details class="sv-filtro ms-auto" #det>
+      <summary class="btn btn-outline-secondary bg-white btn-sm">
+        <i class="bi bi-funnel me-1"></i>{{ filtroCategoria() === 'Todos' ? 'Filtrar categoría' : filtroCategoria() }}
+      </summary>
+      <div class="sv-filtro-menu" role="menu">
+        @for (c of categorias; track c) {
+          <button type="button" role="menuitemradio" [attr.aria-checked]="filtroCategoria() === c"
+                  class="sv-filtro-item" [class.activo]="filtroCategoria() === c"
+                  (click)="filtroCategoria.set(c); det.open = false">{{ c }}</button>
+        }
+      </div>
+    </details>
   </div>
 
-  <!-- Mensaje de éxito -->
   @if (exito()) {
     <div class="alert alert-success d-flex align-items-center gap-2 mb-0" role="alert">
       <i class="bi bi-check-circle-fill"></i><span>{{ exito() }}</span>
     </div>
   }
 
-  <!-- Formulario de movimiento -->
   @if (formVisible()) {
     <div class="sv-card p-4 sv-anim">
       <div class="d-flex justify-content-between align-items-center mb-3">
@@ -45,7 +55,6 @@
     </div>
   }
 
-  <!-- Alerta de reposición -->
   <div class="d-flex align-items-center gap-3 rounded-3 p-3" style="background:#fffbeb;border:1px solid #fde68a">
     <span class="sv-rol-avatar" style="width:38px;height:38px;background:#f59e0b;font-size:1rem"><i class="bi bi-exclamation-lg"></i></span>
     <div class="small" style="color:#92400e">
@@ -53,7 +62,6 @@
     </div>
   </div>
 
-  <!-- Tabla de inventario -->
   <div class="sv-card overflow-hidden">
     <div class="table-responsive">
       <table class="table align-middle mb-0">
@@ -62,17 +70,21 @@
             <th class="fw-semibold px-3 py-3">SKU</th>
             <th class="fw-semibold py-3">Producto</th>
             <th class="fw-semibold py-3">Ubicación</th>
-            <th class="fw-semibold py-3 text-end">Stock</th>
+            <th class="fw-semibold py-3 text-end">Góndola</th>
+            <th class="fw-semibold py-3 text-end">Almacén</th>
+            <th class="fw-semibold py-3 text-end">Total</th>
             <th class="fw-semibold py-3 text-end">Mínimo</th>
             <th class="fw-semibold py-3">Estado</th>
           </tr>
         </thead>
         <tbody>
-          @for (p of productos; track p.sku) {
+          @for (p of productosFiltrados(); track p.sku) {
             <tr>
               <td class="px-3 text-suave font-monospace">{{ p.sku }}</td>
               <td class="fw-semibold">{{ p.nombre }}<div class="small text-tenue fw-normal">{{ p.categoria }}</div></td>
               <td style="color:#44403c">{{ p.ubicacion }}</td>
+              <td class="text-end">{{ p.stockGondola }}</td>
+              <td class="text-end text-suave">{{ p.stockAlmacen }}</td>
               <td class="text-end fw-bold font-archivo">{{ p.stock }}</td>
               <td class="text-end text-suave">{{ p.minimo }}</td>
               <td>

@@ -1,21 +1,19 @@
 <div class="min-vh-100">
-  <!-- Barra superior -->
   <header class="bg-white border-bottom sticky-top" style="z-index:20">
     <div class="container-xl d-flex align-items-center gap-3 py-2" style="min-height:68px">
       <a routerLink="/tienda/catalogo" class="d-flex align-items-center">
         <img src="img/sodimac-logo.png" alt="Sodimac" style="height:36px;width:auto" />
       </a>
 
-      <div class="position-relative flex-grow-1" style="max-width:520px">
-        <i class="bi bi-search position-absolute text-tenue" style="left:16px;top:11px"></i>
-        <input
-          type="search"
-          class="form-control rounded-pill ps-5"
-          style="background:#f5f7fa"
+      <div class="flex-grow-1" style="max-width:520px">
+        <sv-combobox
+          etiqueta="Buscar productos"
+          [mostrarEtiqueta]="false"
           placeholder="¿Qué estás buscando hoy?"
-          (input)="buscar($any($event.target).value)"
-          aria-label="Buscar productos"
-        />
+          [opciones]="opciones"
+          (buscar)="buscar($event)"
+          (seleccion)="buscar($event.etiqueta)"
+        ></sv-combobox>
       </div>
 
       <div class="ms-auto d-flex align-items-center gap-3">

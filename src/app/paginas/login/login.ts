@@ -3,10 +3,11 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { autenticar } from '../../nucleo/datos';
 import { SesionService } from '../../nucleo/sesion.service';
+import { SvSpinner } from '../../nucleo/ui/spinner';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, SvSpinner],
   templateUrl: './login.html',
 })
 export class Login {
@@ -16,7 +17,8 @@ export class Login {
 
   readonly enviado = signal(false);
   readonly verClave = signal(false);
-  readonly errorAcceso = signal(''); // credenciales que no coinciden
+  readonly cargando = signal(false);
+  readonly errorAcceso = signal('');
 
   readonly form = this.fb.nonNullable.group({
     usuario: ['', [Validators.required, Validators.minLength(3)]],
@@ -29,7 +31,6 @@ export class Login {
     return c.invalid && (c.touched || this.enviado());
   }
 
-  // Estado para el icono de validación del campo.
   estado(campo: 'usuario' | 'clave'): 'ok' | 'mal' | '' {
     const c = this.form.controls[campo];
     if (this.invalido(campo)) return 'mal';
@@ -44,23 +45,23 @@ export class Login {
   ingresar(): void {
     this.enviado.set(true);
     this.errorAcceso.set('');
-    if (this.form.invalid) {
+    if (this.form.invalid || this.cargando()) {
       this.form.markAllAsTouched();
       return;
     }
 
+    // Simula la verificación contra el backend para mostrar el estado de carga.
+    this.cargando.set(true);
     const { usuario, clave } = this.form.getRawValue();
-    const rol = autenticar(usuario, clave);
-    if (!rol) {
-      this.errorAcceso.set('Usuario o contraseña incorrectos. Verifica tus credenciales.');
-      return;
-    }
-
-    this.sesion.iniciar(rol);
-    if (rol.destino === 'tienda') {
-      this.router.navigate(['/tienda']);
-    } else {
-      this.router.navigate(['/admin', rol.moduloInicial]);
-    }
+    setTimeout(() => {
+      const rol = autenticar(usuario, clave);
+      if (!rol) {
+        this.cargando.set(false);
+        this.errorAcceso.set('Usuario o contraseña incorrectos. Verifica tus credenciales.');
+        return;
+      }
+      this.sesion.iniciar(rol);
+      this.router.navigate(rol.destino === 'tienda' ? ['/tienda'] : ['/admin', rol.moduloInicial]);
+    }, 800);
   }
 }

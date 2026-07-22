@@ -4,11 +4,12 @@ import { CATEGORIAS } from '../../nucleo/datos';
 import { InventarioService } from '../../nucleo/inventario.service';
 import { Producto } from '../../nucleo/modelos';
 import { SolesPipe } from '../../nucleo/soles.pipe';
+import { SvImagen } from '../../nucleo/ui/imagen';
 import { TiendaService } from '../../nucleo/tienda.service';
 
 @Component({
   selector: 'app-catalogo',
-  imports: [SolesPipe],
+  imports: [SolesPipe, SvImagen],
   templateUrl: './catalogo.html',
 })
 export class Catalogo {

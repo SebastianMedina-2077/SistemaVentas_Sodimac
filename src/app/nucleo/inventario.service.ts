@@ -1,11 +1,16 @@
-import { Injectable } from '@angular/core';
-import { PRODUCTOS } from './datos';
+import { Injectable, inject } from '@angular/core';
+import { CatalogoService } from './catalogo.service';
 import { EstadoStockInfo, Producto } from './modelos';
 
-/** Deriva el estado de stock y las alertas de reposición (CUS-05). */
+// Estado de stock y alertas de reposición (CUS-05).
 @Injectable({ providedIn: 'root' })
 export class InventarioService {
-  readonly productos = PRODUCTOS;
+  private readonly catalogo = inject(CatalogoService);
+
+  /** Lista reactiva de productos (fuente: CatalogoService). */
+  get productos(): Producto[] {
+    return this.catalogo.productos();
+  }
 
   estadoDe(p: Producto): EstadoStockInfo {
     if (p.stock <= p.minimo * 0.5) {
@@ -17,7 +22,7 @@ export class InventarioService {
     return { estado: 'ok', etiqueta: 'En stock', color: '#15803d', fondo: '#f0fdf4', punto: '#22c55e' };
   }
 
-  /** Productos por debajo o en el nivel mínimo. */
+  // Productos en o por debajo del stock mínimo.
   alertas(): Producto[] {
     return this.productos.filter((p) => this.estadoDe(p).estado !== 'ok');
   }

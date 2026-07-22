@@ -1,12 +1,14 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { CarritoService } from '../../nucleo/carrito.service';
+import { PRODUCTOS } from '../../nucleo/datos';
 import { SesionService } from '../../nucleo/sesion.service';
 import { TiendaService } from '../../nucleo/tienda.service';
+import { OpcionCombo, SvCombobox } from '../../nucleo/ui/combobox';
 
 @Component({
   selector: 'app-tienda-layout',
-  imports: [RouterOutlet, RouterLink],
+  imports: [RouterOutlet, RouterLink, SvCombobox],
   templateUrl: './tienda-layout.html',
 })
 export class TiendaLayout {
@@ -16,6 +18,13 @@ export class TiendaLayout {
   readonly tienda = inject(TiendaService);
 
   readonly nombreRol = this.sesion.nombreRol;
+
+  readonly opciones: OpcionCombo[] = PRODUCTOS.map((p) => ({
+    id: p.sku,
+    etiqueta: p.nombre,
+    sub: `${p.marca} · ${p.categoria}`,
+    imagen: p.imagen,
+  }));
 
   buscar(valor: string): void {
     this.tienda.busqueda.set(valor);

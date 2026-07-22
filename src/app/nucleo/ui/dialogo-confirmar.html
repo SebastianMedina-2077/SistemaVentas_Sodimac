@@ -1,0 +1,39 @@
+@if (abierto()) {
+  <div class="sv-dialogo-fondo" (click)="cancelar.emit()">
+    <div
+      class="sv-dialogo sv-anim"
+      role="dialog"
+      aria-modal="true"
+      [attr.aria-labelledby]="idBase + '-t'"
+      [attr.aria-describedby]="idBase + '-m'"
+      (click)="$event.stopPropagation()"
+      (keydown)="alTeclado($event)"
+    >
+      <div class="d-flex gap-3">
+        <span class="sv-dialogo-icono" [class.peligro]="peligro()">
+          <i class="bi {{ icono() }}"></i>
+        </span>
+        <div class="flex-grow-1">
+          <h2 class="fs-5 fw-bold font-archivo mb-1" [id]="idBase + '-t'">{{ titulo() }}</h2>
+          <p class="text-suave mb-0" [id]="idBase + '-m'">{{ mensaje() }}</p>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button #btnCancelar type="button" class="btn btn-outline-secondary" (click)="cancelar.emit()">
+          {{ textoCancelar() }}
+        </button>
+        <button
+          #btnConfirmar
+          type="button"
+          class="btn"
+          [class.btn-danger]="peligro()"
+          [class.btn-primary]="!peligro()"
+          (click)="confirmar.emit()"
+        >
+          {{ textoConfirmar() }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

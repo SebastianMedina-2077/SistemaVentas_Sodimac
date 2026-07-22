@@ -2,23 +2,13 @@
   <!-- Catálogo POS -->
   <div class="col-lg-8">
     <div class="sv-card p-3 mb-3">
-      <label class="form-label small fw-semibold mb-1" for="scan">Escanear / ingresar SKU</label>
-      <div class="input-group">
-        <span class="input-group-text bg-white"><i class="bi bi-upc-scan"></i></span>
-        <input
-          id="scan"
-          class="form-control"
-          [class.is-invalid]="errorSku()"
-          [ngModel]="sku()"
-          (ngModelChange)="sku.set($event); errorSku.set('')"
-          (keyup.enter)="agregarPorSku()"
-          placeholder="Ej. FER-001"
-          autocomplete="off"
-        />
-        <button type="button" class="btn btn-ink" (click)="agregarPorSku()">Agregar</button>
-        <div class="invalid-feedback">{{ errorSku() }}</div>
-      </div>
-      <div class="form-text">Escanea el código, escribe el SKU y presiona Enter, o toca un producto de la lista.</div>
+      <sv-combobox
+        etiqueta="Buscar producto por nombre o código"
+        placeholder="Nombre o SKU (ej. taladro, FER-001)"
+        [opciones]="opciones()"
+        (seleccion)="agregarPorSku($event.id)"
+      ></sv-combobox>
+      <div class="form-text mt-2">Busca por nombre o código y selecciónalo, o toca un producto de la lista.</div>
     </div>
 
     <div class="row g-2">
@@ -27,10 +17,13 @@
           <button type="button" class="sv-card w-100 h-100 p-2 text-start border-0 sv-producto" (click)="agregar(p)">
             <span class="d-flex align-items-center justify-content-center rounded-2 mb-2 overflow-hidden"
                   style="height:64px" [style.background]="p.tinte">
-              <img [src]="p.imagen" [alt]="p.nombre" loading="lazy" style="height:100%;width:100%;object-fit:cover" />
+              <img [src]="p.imagen" [alt]="p.nombre" loading="lazy" style="height:100%;width:100%;object-fit:cover" (error)="$any($event.target).src = p.imagenLocal" />
             </span>
             <span class="d-block fw-semibold lh-sm mb-1" style="font-size:.78rem;min-height:32px">{{ p.nombre }}</span>
-            <span class="d-block font-archivo fw-bold text-primary">{{ p.precio | soles }}</span>
+            <span class="d-flex align-items-center justify-content-between">
+              <span class="font-archivo fw-bold text-primary">{{ p.precio | soles }}</span>
+              <span class="small text-tenue">{{ p.stockGondola }} góndola</span>
+            </span>
           </button>
         </div>
       }
@@ -39,24 +32,42 @@
 
   <!-- Ticket -->
   <div class="col-lg-4">
-    <div class="sv-card p-3 sticky-top d-flex flex-column" style="top:96px">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="font-archivo fw-bold fs-6 m-0">Venta actual</h3>
-        @if (hayItems()) {
-          <button type="button" class="btn btn-link btn-sm sv-enlace text-tenue px-2 py-1" (click)="limpiar()">
-            <i class="bi bi-x-lg me-1"></i>Vaciar
-          </button>
-        }
-      </div>
-
-      @if (comprobante()) {
-        <div class="alert alert-success d-flex align-items-center gap-2 py-2 small" role="alert">
-          <i class="bi bi-check-circle-fill"></i>
-          <span>Comprobante <b>{{ comprobante() }}</b> emitido y stock actualizado.</span>
+    <div class="sv-card p-3 sticky-top d-flex flex-column" style="top:16px">
+      <!-- Órdenes en espera -->
+      @if (ordenes().length) {
+        <div class="mb-3">
+          <div class="text-uppercase text-tenue fw-semibold mb-2" style="font-size:.68rem;letter-spacing:.05em">
+            <i class="bi bi-pause-circle me-1"></i>Órdenes en espera ({{ ordenes().length }})
+          </div>
+          <div class="d-flex flex-column gap-1">
+            @for (o of ordenes(); track o.id) {
+              <button type="button" class="sv-item-prod py-2" (click)="retomar(o)">
+                <span class="flex-grow-1 text-start small">
+                  <b>{{ o.id }}</b> · {{ o.cliente }}<br />
+                  <span class="text-tenue">{{ o.items }} ítem(s) · {{ o.total | soles }}</span>
+                </span>
+                <span class="badge bg-primary-subtle text-primary"><i class="bi bi-arrow-return-left me-1"></i>Retomar</span>
+              </button>
+            }
+          </div>
         </div>
       }
 
-      <div class="d-flex flex-column gap-2 mb-3" style="min-height:120px;max-height:320px;overflow:auto">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="font-archivo fw-bold fs-6 m-0">Venta actual</h3>
+        @if (hayItems()) {
+          <div class="d-flex gap-1">
+            <button type="button" class="btn btn-link btn-sm sv-enlace text-primary px-2 py-1" (click)="guardarOrden()">
+              <i class="bi bi-pause-circle me-1"></i>Guardar
+            </button>
+            <button type="button" class="btn btn-link btn-sm sv-enlace text-tenue px-2 py-1" (click)="confirmarVaciar.set(true)">
+              <i class="bi bi-x-lg me-1"></i>Vaciar
+            </button>
+          </div>
+        }
+      </div>
+
+      <div class="d-flex flex-column gap-2 mb-3" style="min-height:80px;max-height:260px;overflow:auto">
         @for (l of lineas(); track l.producto.sku) {
           <div class="d-flex gap-2 align-items-center border-bottom pb-2">
             <span class="flex-grow-1 small lh-sm">
@@ -72,6 +83,19 @@
           </div>
         } @empty {
           <div class="text-center text-tenue small py-4">Agrega productos para iniciar la venta.</div>
+        }
+      </div>
+
+      <!-- Comprobante y cliente -->
+      <div class="border-top pt-3">
+        <div class="btn-group w-100 mb-2" role="group" aria-label="Tipo de comprobante">
+          <button type="button" class="btn btn-sm" [class.btn-primary]="tipoComprobante() === 'boleta'" [class.btn-outline-secondary]="tipoComprobante() !== 'boleta'" (click)="tipoComprobante.set('boleta')">Boleta</button>
+          <button type="button" class="btn btn-sm" [class.btn-primary]="tipoComprobante() === 'factura'" [class.btn-outline-secondary]="tipoComprobante() !== 'factura'" (click)="tipoComprobante.set('factura')">Factura</button>
+        </div>
+        <input class="form-control form-control-sm mb-2" [ngModel]="doc()" (ngModelChange)="doc.set($event)"
+               [placeholder]="tipoComprobante() === 'factura' ? 'RUC del cliente' : 'DNI (opcional — genérico si vacío)'" inputmode="numeric" autocomplete="off" />
+        @if (tipoComprobante() === 'factura') {
+          <input class="form-control form-control-sm mb-2" [ngModel]="razonSocial()" (ngModelChange)="razonSocial.set($event)" placeholder="Razón social" autocomplete="off" />
         }
       </div>
 
@@ -92,8 +116,76 @@
       </div>
 
       <button type="button" class="btn btn-primary py-2" [disabled]="!hayItems()" (click)="cobrar()">
-        <i class="bi bi-receipt me-1"></i> Cobrar y emitir comprobante
+        <i class="bi bi-receipt me-1"></i> Cobrar y emitir {{ tipoComprobante() }}
       </button>
     </div>
   </div>
 </div>
+
+<!-- Recibo (boleta / factura) -->
+@if (comprobante(); as c) {
+  <div class="sv-recibo-fondo" (click)="nuevaVenta()">
+    <div class="sv-recibo sv-anim" role="dialog" aria-modal="true" aria-label="Comprobante emitido" (click)="$event.stopPropagation()">
+      <div class="text-center mb-2">
+        <div class="fw-bold font-archivo" style="font-size:1.05rem">{{ empresa.nombre }}</div>
+        <div class="sv-recibo-mini">R.U.C. {{ empresa.ruc }}</div>
+        <div class="sv-recibo-mini">{{ empresa.direccion }}</div>
+        <div class="sv-recibo-mini">{{ empresa.tienda }}</div>
+      </div>
+      <div class="sv-recibo-sep"></div>
+      <div class="text-center fw-bold text-uppercase" style="letter-spacing:.05em">
+        {{ c.tipo === 'factura' ? 'Factura Electrónica' : 'Boleta de Venta Electrónica' }}
+      </div>
+      <div class="text-center sv-recibo-mini mb-1">{{ c.serie }}-{{ c.numero }}</div>
+      <div class="sv-recibo-sep"></div>
+
+      <div class="sv-recibo-mini d-flex justify-content-between"><span>Fecha</span><span>{{ c.fecha | date: 'dd/MM/yyyy HH:mm' }}</span></div>
+      @if (c.tipo === 'factura') {
+        <div class="sv-recibo-mini d-flex justify-content-between"><span>R.U.C.</span><span>{{ c.doc }}</span></div>
+        <div class="sv-recibo-mini d-flex justify-content-between"><span>Razón social</span><span class="text-truncate ms-2" style="max-width:180px">{{ c.razonSocial }}</span></div>
+      } @else {
+        <div class="sv-recibo-mini d-flex justify-content-between"><span>DNI</span><span>{{ c.doc }}</span></div>
+      }
+      <div class="sv-recibo-sep"></div>
+
+      <table class="sv-recibo-tabla">
+        <thead>
+          <tr><th>Cant</th><th>Descripción</th><th class="text-end">Importe</th></tr>
+        </thead>
+        <tbody>
+          @for (l of c.lineas; track l.producto.sku) {
+            <tr>
+              <td>{{ l.cantidad }}</td>
+              <td>{{ l.producto.nombre }}<br /><span class="text-tenue">{{ l.producto.precio | soles }} c/u</span></td>
+              <td class="text-end">{{ l.subtotal | soles }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      <div class="sv-recibo-sep"></div>
+
+      <div class="sv-recibo-mini d-flex justify-content-between"><span>Op. gravada</span><span>{{ c.subtotal | soles }}</span></div>
+      <div class="sv-recibo-mini d-flex justify-content-between"><span>IGV (18%)</span><span>{{ c.igv | soles }}</span></div>
+      <div class="d-flex justify-content-between fw-bold fs-6 mt-1"><span>TOTAL</span><span>{{ c.total | soles }}</span></div>
+      <div class="sv-recibo-mini d-flex justify-content-between mt-1"><span>Forma de pago</span><span>{{ c.metodo }}</span></div>
+
+      <div class="sv-recibo-sep"></div>
+      <div class="text-center sv-recibo-mini">Representación impresa del comprobante electrónico.<br />¡Gracias por su compra!</div>
+
+      <div class="d-flex gap-2 mt-3">
+        <button type="button" class="btn btn-outline-secondary w-100" (click)="nuevaVenta()">Nueva venta</button>
+        <button type="button" class="btn btn-primary w-100" onclick="window.print()"><i class="bi bi-printer me-1"></i>Imprimir</button>
+      </div>
+    </div>
+  </div>
+}
+
+<sv-dialogo-confirmar
+  [abierto]="confirmarVaciar()"
+  titulo="¿Vaciar la venta actual?"
+  mensaje="Se quitarán todos los productos del ticket. Esta acción no se puede deshacer."
+  textoConfirmar="Sí, vaciar"
+  textoCancelar="Seguir vendiendo"
+  (confirmar)="vaciar()"
+  (cancelar)="confirmarVaciar.set(false)"
+></sv-dialogo-confirmar>

@@ -3,8 +3,7 @@
    Bootstrap 5 tematizado con la identidad de Sodimac Perú.
    ============================================================ */
 
-// Tema de Bootstrap con la paleta del logo de Sodimac. Usamos @use ... with en
-// lugar de @import para configurar las variables (evita el aviso de Dart Sass).
+// @use ... with configura las variables sin el aviso de deprecación de Dart Sass.
 @use 'bootstrap/scss/bootstrap' with (
   $primary:   #0072ce,   // azul Sodimac
   $secondary: #5b6770,
@@ -59,6 +58,7 @@ body {
   background: #fff;
   border: 1px solid var(--sv-borde);
   border-radius: 1rem;
+  box-shadow: 0 1px 2px rgba(22, 32, 43, 0.04);
 }
 .sv-panel-oscuro {
   background: var(--sv-ink);
@@ -94,6 +94,57 @@ body {
   display: flex; align-items: center; justify-content: center;
   font: 800 20px 'Archivo', sans-serif;
 }
+
+/* --- Panel admin: barra superior (toque glass sutil, legible) --- */
+.sv-topbar {
+  border-bottom: 1px solid var(--sv-borde);
+  box-shadow: 0 1px 2px rgba(22, 32, 43, 0.04);
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: saturate(180%) blur(10px);
+}
+@supports not (backdrop-filter: blur(1px)) {
+  .sv-topbar { background: #fff; }
+}
+
+/* --- Marca (lockup casa + wordmark) --- */
+.sv-brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; }
+.sv-brand-badge { background: #fff; border-radius: 0.55rem; padding: 0.3rem 0.45rem; display: flex; }
+.sv-brand-badge img { height: 26px; width: auto; display: block; }
+.sv-brand-nombre { color: #fff; font: 800 1.35rem 'Archivo', sans-serif; letter-spacing: -0.02em; }
+
+/* --- Etiqueta de grupo en la navegación --- */
+.sv-nav-grupo {
+  color: rgba(255, 255, 255, 0.38);
+  font-size: 0.66rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 0.9rem 0.9rem 0.3rem;
+}
+.sv-nav-grupo:first-child { padding-top: 0.2rem; }
+
+/* --- Menú hamburguesa (tres líneas, accesible) --- */
+.sv-hamburguesa {
+  display: inline-flex; flex-direction: column; justify-content: center; gap: 4px;
+  width: 42px; height: 42px; padding: 0 9px; border: 1px solid var(--sv-borde);
+  border-radius: 0.6rem; background: #fff; cursor: pointer;
+}
+.sv-hamburguesa span { display: block; height: 2px; width: 100%; background: var(--sv-ink); border-radius: 2px; }
+.sv-hamburguesa:focus-visible { outline: 2px solid var(--sv-azul); outline-offset: 2px; }
+
+/* --- Drawer móvil (off-canvas desde la izquierda) --- */
+.sv-scrim {
+  position: fixed; inset: 0; z-index: 1040;
+  background: rgba(22, 32, 43, 0.45);
+  backdrop-filter: blur(2px);
+  animation: svFade 0.15s ease-out;
+}
+.sv-drawer {
+  position: fixed; top: 0; left: 0; z-index: 1045; height: 100dvh; width: 270px; max-width: 82vw;
+  background: var(--sv-ink); color: #fff; padding: 1.25rem 1rem;
+  display: flex; flex-direction: column;
+  transform: translateX(-100%); transition: transform 0.24s ease-out;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.4);
+}
+.sv-drawer.abierto { transform: translateX(0); }
+@media (prefers-reduced-motion: reduce) { .sv-drawer { transition: none; } }
 
 /* --- Panel admin: sidebar --- */
 .sv-sidebar {
@@ -158,8 +209,7 @@ body {
 
 .cursor-pointer { cursor: pointer; }
 
-/* --- Enlace/botón de texto sutil: sin subrayado permanente ---
-   El subrayado aparece solo al pasar el cursor o con foco de teclado. */
+/* --- Enlace de texto: subrayado solo en hover/foco --- */
 .sv-enlace {
   text-decoration: none;
   font-weight: 600;
@@ -183,11 +233,24 @@ body {
 /* --- Login --- */
 .sv-login { min-height: 100dvh; }
 .sv-login-marca {
+  position: relative; overflow: hidden;
   background:
-    radial-gradient(circle at 80% -10%, rgba(0, 145, 208, 0.35), transparent 55%),
-    radial-gradient(circle at 0% 110%, rgba(227, 6, 19, 0.22), transparent 50%),
+    radial-gradient(circle at 82% -8%, rgba(0, 145, 208, 0.4), transparent 52%),
+    radial-gradient(circle at -5% 108%, rgba(227, 6, 19, 0.22), transparent 48%),
     var(--sv-ink);
   color: #fff;
+}
+/* Trama sutil de puntos para dar textura sin restar formalidad. */
+.sv-login-marca::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 22px 22px; opacity: 0.6;
+}
+.sv-login-glass {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 1rem; padding: 1.25rem 1.4rem;
+  backdrop-filter: blur(8px);
 }
 /* El estado válido usa el azul de marca en lugar del verde por defecto de Bootstrap,
    conservando el icono de validación (check) que Bootstrap renderiza en el campo. */
@@ -199,3 +262,225 @@ body {
 /* Campo con botón adjunto (mostrar/ocultar): sin icono de fondo, solo borde de color */
 .form-control.sv-sin-icono.is-valid,
 .form-control.sv-sin-icono.is-invalid { background-image: none; }
+
+/* --- Login: lista de ventajas del panel de marca --- */
+.sv-login-item { display: flex; align-items: center; gap: 0.75rem; }
+.sv-login-item i {
+  width: 34px; height: 34px; flex: none; border-radius: 0.6rem;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(255, 255, 255, 0.1); color: #7cc4f2;
+}
+
+/* --- Spinner indeterminado (role="progressbar", sin aria-valuenow) --- */
+.sv-spinner { display: inline-flex; }
+.sv-spinner svg { width: 100%; height: 100%; animation: svGirar 1.4s linear infinite; }
+.sv-spinner-pista { stroke: var(--sv-borde); }
+.sv-spinner-arco {
+  stroke: var(--sv-azul); stroke-linecap: round;
+  animation: svArco 1.4s ease-in-out infinite;
+}
+.sv-spinner.claro .sv-spinner-pista { stroke: rgba(255, 255, 255, 0.35); }
+.sv-spinner.claro .sv-spinner-arco { stroke: #fff; }
+@keyframes svGirar { to { transform: rotate(360deg); } }
+@keyframes svArco {
+  0% { stroke-dasharray: 1 119; stroke-dashoffset: 0; }
+  50% { stroke-dasharray: 90 119; stroke-dashoffset: -25; }
+  100% { stroke-dasharray: 90 119; stroke-dashoffset: -104; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sv-spinner svg { animation-duration: 2.6s; }
+  .sv-spinner-arco { animation: none; stroke-dasharray: 80 119; }
+}
+
+/* --- Skeleton de carga --- */
+.sv-skel { position: relative; overflow: hidden; background: #eef2f6; border-radius: 0.5rem; }
+.sv-skel::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+  transform: translateX(-100%); animation: svShimmer 1.3s infinite;
+}
+@keyframes svShimmer { to { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) { .sv-skel::after { animation: none; } }
+
+/* --- Combobox --- */
+.sv-combo { position: relative; }
+.sv-combo-lista {
+  position: absolute; z-index: 30; left: 0; right: 0; top: calc(100% + 4px);
+  margin: 0; padding: 0.35rem; list-style: none; max-height: 320px; overflow-y: auto;
+  background: #fff; border: 1px solid var(--sv-borde); border-radius: 0.75rem;
+  box-shadow: 0 14px 34px rgba(22, 32, 43, 0.14);
+}
+.sv-combo-opcion {
+  display: flex; align-items: center; gap: 0.7rem; padding: 0.5rem 0.6rem;
+  border-radius: 0.55rem; cursor: pointer;
+}
+.sv-combo-opcion.activo { background: #eaf3fb; }
+.sv-combo-img { width: 38px; height: 38px; border-radius: 0.5rem; overflow: hidden; flex: none; background: #f5f7fa; }
+.sv-combo-img img { width: 100%; height: 100%; object-fit: cover; }
+.sv-combo-ico { width: 38px; text-align: center; color: var(--sv-azul); font-size: 1.1rem; }
+.sv-combo-vacio { padding: 0.6rem; color: var(--sv-texto-tenue); font-size: 0.9rem; }
+
+/* --- Diálogo de confirmación (modal) --- */
+.sv-dialogo-fondo {
+  position: fixed; inset: 0; z-index: 1050; display: flex; align-items: center; justify-content: center;
+  padding: 1rem; background: rgba(22, 32, 43, 0.5); animation: svFade 0.15s ease-out;
+}
+.sv-dialogo {
+  width: 100%; max-width: 440px; background: #fff; border-radius: 1rem; padding: 1.5rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+}
+.sv-dialogo-icono {
+  width: 44px; height: 44px; flex: none; border-radius: 0.7rem;
+  display: flex; align-items: center; justify-content: center;
+  background: #eaf3fb; color: var(--sv-azul); font-size: 1.3rem;
+}
+.sv-dialogo-icono.peligro { background: #fdecec; color: var(--sv-rojo); }
+@keyframes svFade { from { opacity: 0; } to { opacity: 1; } }
+
+/* --- Panel admin: shell de altura fija con scroll interno --- */
+.sv-admin { height: 100dvh; overflow: hidden; }
+.sv-admin-contenido { min-height: 0; overflow-y: auto; }
+
+/* --- Consulta: dos paneles a pantalla completa solo en escritorio (≥1200px);
+   en pantallas menores fluye de forma natural y la página scrollea. --- */
+.sv-consulta { min-height: 0; }
+@media (min-width: 1200px) {
+  .sv-consulta { height: 100%; }
+  .sv-consulta-panes { flex: 1 1 auto; min-height: 0; }
+  .sv-consulta-pane { height: 100%; }
+}
+@media (max-width: 1199.98px) {
+  .sv-consulta-pane .sv-lista-scroll { max-height: 60vh; }
+}
+
+/* --- Consulta: lista con scroll interno + cabeceras de categoría sticky --- */
+.sv-lista-scroll { overflow-y: auto; min-height: 0; }
+.sv-grupo-cab {
+  position: sticky; top: 0; z-index: 2;
+  background: rgba(245, 247, 250, 0.94); backdrop-filter: blur(4px);
+  padding: 0.5rem 0.25rem; margin-bottom: 0.35rem;
+  font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700;
+  color: var(--sv-texto-suave); border-bottom: 1px solid var(--sv-borde);
+}
+.sv-item-prod {
+  display: flex; align-items: center; gap: 0.7rem; width: 100%;
+  background: #fff; border: 1px solid var(--sv-borde); border-radius: 0.7rem;
+  padding: 0.5rem 0.6rem; cursor: pointer; transition: 0.12s;
+}
+.sv-item-prod:hover { border-color: #c7d2dc; }
+.sv-item-prod.activo { border-color: var(--sv-azul); background: #eaf3fb; }
+.sv-item-prod:focus-visible { outline: 2px solid var(--sv-azul); outline-offset: 2px; }
+.sv-item-prod img { width: 46px; height: 46px; border-radius: 0.5rem; object-fit: cover; flex: none; background: #f5f7fa; }
+
+/* --- Imagen con respaldo --- */
+.sv-imagen { display: block; width: 100%; height: 100%; }
+.sv-imagen img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* --- Notificaciones (toasts) --- */
+.sv-toaster {
+  position: fixed; top: 1rem; right: 1rem; z-index: 1080;
+  display: flex; flex-direction: column; gap: 0.6rem; width: 340px; max-width: calc(100vw - 2rem);
+}
+.sv-toast {
+  display: flex; align-items: flex-start; gap: 0.7rem; padding: 0.85rem 1rem;
+  border-radius: 0.7rem; background: #fff; border: 1px solid var(--sv-borde);
+  box-shadow: 0 12px 30px rgba(22, 32, 43, 0.16); animation: svToastIn 0.22s ease-out;
+}
+.sv-toast > i { font-size: 1.15rem; margin-top: 1px; }
+.sv-toast-exito { border-left: 4px solid var(--sv-verde, #158a48); }
+.sv-toast-exito > i { color: #158a48; }
+.sv-toast-info { border-left: 4px solid var(--sv-azul); }
+.sv-toast-info > i { color: var(--sv-azul); }
+.sv-toast-error { border-left: 4px solid var(--sv-rojo); }
+.sv-toast-error > i { color: var(--sv-rojo); }
+.sv-toast-msg { font-size: 0.82rem; color: var(--sv-texto-suave); margin-top: 2px; }
+.sv-toast-cerrar {
+  background: none; border: none; color: var(--sv-texto-tenue); padding: 0; line-height: 1;
+  font-size: 0.85rem; cursor: pointer; flex-shrink: 0;
+}
+.sv-toast-cerrar:hover { color: var(--sv-ink); }
+@keyframes svToastIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .sv-toast { animation: none; } }
+
+/* --- Stepper de progreso de pedido (adaptado a la marca) --- */
+.sv-stepper-step { display: flex; margin-bottom: 1.75rem; position: relative; }
+.sv-stepper-step:last-child { margin-bottom: 0; }
+.sv-stepper-line {
+  position: absolute; left: 19px; top: 42px; bottom: -1.75rem; width: 2px; background: var(--sv-borde); z-index: 1;
+}
+.sv-stepper-step:last-child .sv-stepper-line { display: none; }
+.sv-stepper-circle {
+  width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  margin-right: 1rem; z-index: 2; flex-shrink: 0; font-weight: 700; background: #fff;
+}
+.sv-step-ok .sv-stepper-circle { background: var(--sv-azul); color: #fff; }
+.sv-step-actual .sv-stepper-circle { border: 2px solid var(--sv-azul); color: var(--sv-azul); }
+.sv-step-pend .sv-stepper-circle { border: 2px solid var(--sv-borde); color: var(--sv-texto-tenue); }
+.sv-stepper-title { font-weight: 600; }
+.sv-step-pend .sv-stepper-title { color: var(--sv-texto-tenue); }
+.sv-stepper-estado {
+  font-size: 0.78rem; display: inline-block; padding: 2px 10px; border-radius: 12px; margin-top: 4px; font-weight: 600;
+}
+.sv-step-ok .sv-stepper-estado { background: #dcfce7; color: #166534; }
+.sv-step-actual .sv-stepper-estado { background: #dbeafe; color: #1d4ed8; }
+.sv-step-pend .sv-stepper-estado { background: #f1f5f9; color: #64748b; }
+.sv-stepper-time { font-size: 0.72rem; color: var(--sv-texto-tenue); margin-top: 4px; }
+
+/* --- Filtro desplegable (details/summary) --- */
+.sv-filtro { position: relative; display: inline-block; }
+.sv-filtro > summary { list-style: none; cursor: pointer; }
+.sv-filtro > summary::-webkit-details-marker { display: none; }
+.sv-filtro-menu {
+  position: absolute; right: 0; top: calc(100% + 4px); z-index: 25; min-width: 200px;
+  background: #fff; border: 1px solid var(--sv-borde); border-radius: 0.7rem; padding: 0.35rem;
+  box-shadow: 0 14px 34px rgba(22, 32, 43, 0.14); display: flex; flex-direction: column;
+}
+.sv-filtro-item {
+  text-align: left; background: none; border: none; border-radius: 0.5rem;
+  padding: 0.5rem 0.7rem; font-size: 0.88rem; color: var(--sv-ink); cursor: pointer;
+}
+.sv-filtro-item:hover { background: #eef2f6; }
+.sv-filtro-item.activo { background: #eaf3fb; color: var(--sv-azul); font-weight: 600; }
+
+/* --- Barra flotante de acciones (glass) --- */
+.sv-fab-bar {
+  position: fixed; left: 50%; bottom: 1.5rem; transform: translateX(-50%); z-index: 1030;
+  display: flex; align-items: center; gap: 0.35rem; padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.82); backdrop-filter: saturate(180%) blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.6); border-radius: 999px;
+  box-shadow: 0 12px 34px rgba(22, 32, 43, 0.18);
+}
+.sv-fab {
+  width: 44px; height: 44px; border-radius: 50%; border: none; background: transparent;
+  color: var(--sv-texto-suave); font-size: 1.15rem; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: transform 0.18s ease, background 0.18s ease, color 0.18s ease;
+}
+.sv-fab:hover { background: #eef2f6; color: var(--sv-ink); transform: translateY(-2px); }
+.sv-fab:focus-visible { outline: 2px solid var(--sv-azul); outline-offset: 2px; }
+.sv-fab-primary { background: var(--sv-azul); color: #fff; }
+.sv-fab-primary:hover { background: var(--sv-azul-osc); color: #fff; }
+
+/* --- Recibo (boleta / factura, estilo ticket) --- */
+.sv-recibo-fondo {
+  position: fixed; inset: 0; z-index: 1055; display: flex; align-items: flex-start; justify-content: center;
+  padding: 2rem 1rem; overflow-y: auto; background: rgba(22, 32, 43, 0.5); animation: svFade 0.15s ease-out;
+}
+.sv-recibo {
+  width: 100%; max-width: 360px; background: #fff; border-radius: 0.5rem; padding: 1.5rem 1.25rem;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3); color: #16202b;
+  font-family: 'DejaVu Sans Mono', ui-monospace, 'Courier New', monospace; font-size: 0.8rem;
+}
+.sv-recibo-mini { font-size: 0.72rem; color: #44505c; }
+.sv-recibo-sep { border-top: 1px dashed #b8c2cc; margin: 0.6rem 0; }
+.sv-recibo-tabla { width: 100%; border-collapse: collapse; font-size: 0.72rem; }
+.sv-recibo-tabla th { text-align: left; color: var(--sv-texto-tenue); font-weight: 700; padding-bottom: 4px; }
+.sv-recibo-tabla td { vertical-align: top; padding: 2px 0; }
+.sv-recibo-tabla th:first-child, .sv-recibo-tabla td:first-child { width: 32px; }
+@media print {
+  body * { visibility: hidden; }
+  .sv-recibo-fondo, .sv-recibo-fondo * { visibility: visible; }
+  .sv-recibo-fondo { position: absolute; inset: 0; background: #fff; padding: 0; }
+  .sv-recibo { box-shadow: none; max-width: 100%; }
+  .sv-recibo .btn { display: none; }
+}

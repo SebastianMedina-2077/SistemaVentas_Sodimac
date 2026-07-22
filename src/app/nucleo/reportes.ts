@@ -1,7 +1,4 @@
-/**
- * Datos mock de indicadores para el Dashboard y el módulo de Reportes (CUS-06).
- * En producción provendrían de la consolidación de ventas en base de datos.
- */
+// Datos mock de indicadores para Dashboard y Reportes (CUS-06).
 
 export interface BarraCategoria { etiqueta: string; monto: number; color: string; }
 export interface BarraTurno { etiqueta: string; monto: number; }

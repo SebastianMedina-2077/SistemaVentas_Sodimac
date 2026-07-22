@@ -1,5 +1,5 @@
-import { Injectable, Signal, signal } from '@angular/core';
-import { PRODUCTOS } from './datos';
+import { Injectable, Signal, inject, signal } from '@angular/core';
+import { CatalogoService } from './catalogo.service';
 import { LineaCarrito, Producto, Totales } from './modelos';
 
 type Canal = 'tienda' | 'pos';
@@ -9,14 +9,13 @@ const IGV = 0.18;
 // Dos carritos independientes en memoria: 'tienda' (compra online) y 'pos' (ticket del cajero).
 @Injectable({ providedIn: 'root' })
 export class CarritoService {
-  private readonly indice = new Map(PRODUCTOS.map((p) => [p.sku, p]));
+  private readonly catalogo = inject(CatalogoService);
 
   private readonly carritos: Record<Canal, ReturnType<typeof signal<Record<string, number>>>> = {
     tienda: signal<Record<string, number>>({}),
     pos: signal<Record<string, number>>({}),
   };
 
-  // Señal cruda (sku → cantidad) del canal.
   crudo(canal: Canal): Signal<Record<string, number>> {
     return this.carritos[canal].asReadonly();
   }
@@ -46,11 +45,15 @@ export class CarritoService {
     this.carritos[canal].set({});
   }
 
-  // Líneas del carrito (lee la señal, por eso es reactivo).
+  // Restaura un carrito completo (usado al retomar una orden guardada en el POS).
+  establecer(canal: Canal, mapa: Record<string, number>): void {
+    this.carritos[canal].set({ ...mapa });
+  }
+
   lineas(canal: Canal): LineaCarrito[] {
     const mapa = this.carritos[canal]();
     return Object.keys(mapa).map((sku) => {
-      const producto = this.indice.get(sku) as Producto;
+      const producto = this.catalogo.buscar(sku) as Producto;
       const cantidad = mapa[sku];
       return { producto, cantidad, subtotal: producto.precio * cantidad };
     });
