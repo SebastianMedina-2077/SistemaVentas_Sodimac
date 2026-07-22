@@ -93,6 +93,42 @@ redirige al módulo inicial del rol. El menú lateral (`admin-layout`) también 
 solo lectura que muestra stock disponible, ubicación, precio, descripción ("para qué
 sirve") y características de cada producto. No vende ni edita.
 
+## Casos de uso del sistema (CUS)
+
+Casos de uso del documento de análisis (`document/AvanceProy2_analisis de sistemas.pdf`) y
+la parte del sistema que los implementa en este prototipo.
+
+### Actores del sistema
+
+| Actor                  | Tipo       | Rol en el negocio |
+| ---------------------- | ---------- | ----------------- |
+| Cliente                | Primario   | Compra en canal físico o digital |
+| Cajero / Operador POS  | Primario   | Registra ventas, cobros y devoluciones |
+| Asesor de Ventas       | Primario   | Orienta al cliente y verifica stock |
+| Jefe de Logística      | Primario   | Gestiona el inventario físico |
+| Gerente de Tienda      | Primario   | Consulta y exporta reportes de ventas |
+| Entidad Financiera     | Secundario | Valida y autoriza los pagos (incluye CMR Falabella) |
+
+### Especificaciones
+
+| Código | Caso de uso | Actor principal | Descripción | Dónde se implementa |
+| ------ | ----------- | --------------- | ----------- | ------------------- |
+| **CUS-01** | Registrar venta en POS | Cajero | Registra una venta en punto de venta físico, procesa el cobro y emite el comprobante electrónico. | `admin/pos` |
+| **CUS-02** | Realizar compra en línea | Cliente | Navegar el catálogo, gestionar el carrito y completar la compra con pago electrónico y entrega a domicilio. | `tienda/catalogo` + `tienda/checkout` (modalidad envío) |
+| **CUS-03** | Reservar producto (Click & Collect) | Cliente | Reservar un producto en una tienda y retirarlo presencialmente dentro de un plazo. | `tienda/checkout` (modalidad retiro en tienda) |
+| **CUS-04** | Registrar devolución / cambio | Cajero | Procesa una devolución o cambio verificando condiciones y emitiendo el documento correspondiente. | `admin/devoluciones` |
+| **CUS-05** | Gestionar inventario | Jefe de Logística | Registra entradas, salidas y conteos cíclicos, mantiene el stock al día y genera alertas de reposición. | `admin/inventario` |
+| **CUS-06** | Generar reporte de ventas | Gerente de Tienda | Consolida los KPI de ventas, los muestra en pantalla y permite exportarlos. | `admin/reportes` + `admin/dashboard` |
+| CUS-07 | Procesar pago *(subflujo)* | Entidad Financiera | Valida y autoriza el pago (efectivo, tarjeta, CMR Falabella). | Integrado en POS y checkout (método de pago) |
+| CUS-08 | Emitir comprobante electrónico *(subflujo)* | Sistema | Genera el comprobante fiscal al cerrar la transacción. | Integrado en POS y checkout (comprobante) |
+
+> **Apoyo del asesor.** La verificación de existencias y características que hace el asesor
+> (actor de apoyo en CUS-01 y CUS-02) se cubre con el módulo `admin/consulta`.
+>
+> **Nota del prototipo.** En el análisis, CUS-04 lo ejecuta el cajero; aquí el módulo de
+> devoluciones se dejó bajo el gerente para que el cajero solo opere ventas. Es una
+> decisión de permisos del prototipo, ajustable en `ROLES` (`datos.ts`).
+
 ## Validaciones (Bootstrap + Reactive Forms)
 
 Los formularios usan `ReactiveFormsModule` y muestran el error con las clases de Bootstrap.
